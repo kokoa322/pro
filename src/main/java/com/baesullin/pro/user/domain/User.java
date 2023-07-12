@@ -78,5 +78,10 @@ public class User extends TimeStamped {
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviewList = new ArrayList<>();
 
+    public String getUsername() {
+        return this.socialId;
+    }
+
+
 
 }

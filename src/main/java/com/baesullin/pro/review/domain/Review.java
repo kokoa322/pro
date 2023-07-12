@@ -1,5 +1,6 @@
 package com.baesullin.pro.review.domain;
 
+import com.baesullin.pro.review.dto.ReviewRequestDto;
 import com.baesullin.pro.store.domain.Store;
 import com.baesullin.pro.tag.domain.Tag;
 import com.baesullin.pro.user.domain.User;
@@ -65,5 +66,12 @@ public class Review extends TimeStamped {
 
     @OneToMany(mappedBy = "reviewId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tag> tagList = new ArrayList<>();
+
+    public Review(ReviewRequestDto reviewRequestDto, Store store, User user){
+        this.point   = reviewRequestDto.getPoint();
+        this.userId  = user;
+        this.content = reviewRequestDto.getContent();
+        this.storeId = store;
+    }
 
 }
