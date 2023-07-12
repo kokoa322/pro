@@ -1,6 +1,6 @@
 package com.baesullin.pro.review.domain;
 
-import com.mpnp.baechelin.util.TimeStamped;
+import com.baesullin.pro.util.TimeStamped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
