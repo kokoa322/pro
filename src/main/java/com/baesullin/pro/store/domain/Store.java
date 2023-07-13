@@ -29,6 +29,7 @@ public class Store implements Serializable {
 
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false, precision = 25, scale = 22)
     private BigDecimal latitude;
 

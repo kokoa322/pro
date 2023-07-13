@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.io.IOException;
 
 @RequiredArgsConstructor
@@ -40,11 +41,14 @@ public class ReviewController {
      * 리뷰 작성
      */
     @PostMapping("/review")
-    public SuccessResponse review(@ModelAttribute ReviewRequestDto reviewRequestDto,
-                                  User user) throws IOException {
+    public SuccessResponse review(@ModelAttribute @Valid ReviewRequestDto reviewRequestDto, User user) throws IOException {
+
+
+
         if (user == null) {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
+
         reviewService.review(reviewRequestDto, user.getUsername());
         return new SuccessResponse("리뷰 등록 성공");
     }

@@ -6,8 +6,10 @@ import com.baesullin.pro.tag.domain.Tag;
 import com.baesullin.pro.user.domain.User;
 import com.baesullin.pro.util.TimeStamped;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,9 @@ public class Review extends TimeStamped {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    //평가(댓글)내용
+    //평가(댓글)
+    @NotBlank(message = "내용을 입력해주세요")
+    @Length(min = 20, max = 200, message = "20자 이상, 200자 이하로 작성해주세요")
     @Column(nullable = false)
     private String content;
 

@@ -18,6 +18,7 @@ import com.baesullin.pro.user.domain.User;
 import com.baesullin.pro.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,6 @@ public class ReviewService {
      * 리뷰 작성
      */
     public void review(ReviewRequestDto reviewRequestDto, String socialId) throws IOException {
-
 
         for(String tag: reviewRequestDto.getTagList()){
             for(String tagsList: reviewRequestDto.Tags()){
@@ -82,7 +82,7 @@ public class ReviewService {
 //        }
 
         tagRepository.saveAll(tagList);
-        reviewImageRepository.saveAll(reviewImageUrlList);
+        //reviewImageRepository.saveAll(reviewImageUrlList);
         reviewRepository.save(review); // 아래의 {store.updatePointAvg()} 보다 리뷰가 먼저 처리되게 해야한다.
         storeService.updateAvg(store, socialId);
     }
