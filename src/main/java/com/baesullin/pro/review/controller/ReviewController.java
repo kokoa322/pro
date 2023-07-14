@@ -8,6 +8,7 @@ import com.baesullin.pro.review.dto.ReviewRequestDto;
 import com.baesullin.pro.review.service.ReviewService;
 import com.baesullin.pro.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -57,12 +58,16 @@ public class ReviewController {
     @GetMapping("/review/{storeId}")
     public ResponseEntity<PageInfoResponseDto> getStoreReview(@PathVariable int storeId, User user,
                                                               @PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+
         if (user == null) {
             PageInfoResponseDto pageInfoResponseDto = reviewService.getReview(storeId, pageable);
             return new ResponseEntity<>(pageInfoResponseDto, HttpStatus.OK);
         }
 
-        return null;
+        PageInfoResponseDto pageInfoResponseDto = reviewService.getReview(storeId, user.getUsername(), pageable);
+        return new ResponseEntity<>(pageInfoResponseDto, HttpStatus.OK);
+
+
     }
 
 //    @GetMapping("/review/{storeId}")

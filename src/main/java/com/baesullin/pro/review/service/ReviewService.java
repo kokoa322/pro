@@ -124,5 +124,33 @@ public class ReviewService {
                 .build();
     }
 
+    public PageInfoResponseDto getReview(long storeId, String socialId, Pageable pageable) {
+
+        User myUser = userRepository.findBySocialId(socialId);
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new CustomException(ErrorCode.NO_STORE_FOUND));
+        Page<Review> reviewList = reviewRepository.findAllByStoreId(store, pageable);
+
+        List<ReviewResponseDto> reviewResponseDtoList = new ArrayList<>();
+
+
+        for (Review review : reviewList) {
+            ReviewResponseDto reviewResponseDto = new ReviewResponseDto(review);
+            User user = userRepository.findById(reviewResponseDto.getUserId()).orElseThrow(() -> new CustomException(ErrorCode.NO_USER_FOUND));
+            reviewResponseDto.userInfo(user, myUser);
+            reviewResponseDtoList.add(reviewResponseDto);
+        }
+
+        return PageInfoResponseDto
+                .builder()
+                .totalElements((int) reviewList.getTotalElements())
+                .totalPages(reviewList.getTotalPages())
+                .number(reviewList.getNumber())
+                .size(reviewList.getSize())
+                .reviewResponseDtoList(reviewResponseDtoList)
+                .hasNextPage(!reviewList.isFirst())
+                .hasPreviousPage(reviewList.isLast())
+                .build();
+    }
+
 
 }

@@ -67,6 +67,22 @@ public class ReviewResponseDto {
         }
     }
 
+    public void userInfo(User user, User myUser){
+        this.email    = user.getEmail();
+        this.name     = user.getName();
+        this.userImage = user.getProfileImageUrl();
+
+        if (myUser != null) {
+            if(this.userId == myUser.getId()){
+                this.myReview = "Y";
+            } else if (this.userId != myUser.getId()){
+                this.myReview = "N";
+            }
+        } else {
+            this.myReview = "N";
+        }
+    }
+
     public void userInfo(User user){
         this.email    = user.getEmail();
         this.name     = user.getName();
