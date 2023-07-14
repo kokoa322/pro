@@ -43,8 +43,6 @@ public class ReviewController {
     @PostMapping("/review")
     public SuccessResponse review(@ModelAttribute @Valid ReviewRequestDto reviewRequestDto, User user) throws IOException {
 
-
-
         if (user == null) {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
@@ -52,6 +50,27 @@ public class ReviewController {
         reviewService.review(reviewRequestDto, user.getUsername());
         return new SuccessResponse("리뷰 등록 성공");
     }
+
+    /**
+     * 리뷰 조회
+     */
+    @GetMapping("/review/{storeId}")
+    public ResponseEntity<PageInfoResponseDto> getStoreReview(@PathVariable int storeId, User user,
+                                                              @PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        if (user == null) {
+            PageInfoResponseDto pageInfoResponseDto = reviewService.getReview(storeId, pageable);
+            return new ResponseEntity<>(pageInfoResponseDto, HttpStatus.OK);
+        }
+
+        return null;
+    }
+
+//    @GetMapping("/review/{storeId}")
+//    public ResponseEntity<List<ReviewResponseDto>> getStoreReview(@PathVariable int storeId,
+//                                                                  @AuthenticationPrincipal User user) {
+//        List<ReviewResponseDto> reviewList = reviewService.getReview(storeId, user.getUsername());
+//        return new ResponseEntity<>(reviewList, HttpStatus.OK);
+//    }
 
 
 }

@@ -1,4 +1,4 @@
-package com.baesullin.pro.s3;
+package com.baesullin.pro.config.s3;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

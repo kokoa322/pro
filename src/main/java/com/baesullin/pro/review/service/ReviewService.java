@@ -16,12 +16,19 @@ import com.baesullin.pro.tag.domain.Tag;
 import com.baesullin.pro.tag.repository.TagRepository;
 import com.baesullin.pro.user.domain.User;
 import com.baesullin.pro.user.repository.UserRepository;
+import com.baesullin.pro.util.AwsS3Manager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
@@ -37,7 +44,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class ReviewService {
 
-
+    private final AwsS3Manager awsS3Manager;
     private final ReviewRepository reviewRepository;
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
@@ -72,19 +79,50 @@ public class ReviewService {
         List<ReviewImage> reviewImageUrlList = new ArrayList<>();
         List<MultipartFile> newReviewImage = reviewRequestDto.getImageFile();
 
-//        // todo 이미지가 널값이 아니라면 업로드 실행
-//        if (newReviewImage != null && !newReviewImage.isEmpty()) {
-//            for (MultipartFile reviewImageFile : newReviewImage) {
-//                String fileDir = awsS3Manager.uploadFile(reviewImageFile);
-//                log.info("upload --> " + fileDir);
-//                reviewImageUrlList.add(ReviewImage.builder().reviewId(review).reviewImageUrl(fileDir).build());
-//            } // 리뷰이미지 -> url -> 엔티티 변환
-//        }
+        // todo 이미지가 널값이 아니라면 업로드 실행
+        if (newReviewImage != null && !newReviewImage.isEmpty()) {
+            for (MultipartFile reviewImageFile : newReviewImage) {
+                String fileDir = awsS3Manager.uploadFile(reviewImageFile);
+                log.info("upload --> " + fileDir);
+                reviewImageUrlList.add(ReviewImage.builder().reviewId(review).reviewImageUrl(fileDir).build());
+            } // 리뷰이미지 -> url -> 엔티티 변환
+        }
 
         tagRepository.saveAll(tagList);
-        //reviewImageRepository.saveAll(reviewImageUrlList);
+        reviewImageRepository.saveAll(reviewImageUrlList);
         reviewRepository.save(review); // 아래의 {store.updatePointAvg()} 보다 리뷰가 먼저 처리되게 해야한다.
         storeService.updateAvg(store, socialId);
     }
+
+
+    /**
+     * 리뷰 조회
+     */
+
+    public PageInfoResponseDto getReview(long storeId, Pageable pageable) {
+
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new IllegalArgumentException("해당 가게가 없습니다"));
+        Page<Review> reviewList = reviewRepository.findAllByStoreId(store, pageable);
+
+        List<ReviewResponseDto> reviewResponseDtoList = new ArrayList<>();
+        for (Review review : reviewList) {
+            ReviewResponseDto reviewResponseDto = new ReviewResponseDto(review);
+            User user = userRepository.findById(reviewResponseDto.getUserId()).orElseThrow(() -> new CustomException(ErrorCode.NO_USER_FOUND));
+            reviewResponseDto.userInfo(user);
+            reviewResponseDtoList.add(reviewResponseDto);
+        }
+
+        return PageInfoResponseDto
+                .builder()
+                .totalElements((int) reviewList.getTotalElements())
+                .totalPages(reviewList.getTotalPages())
+                .number(reviewList.getNumber())
+                .size(reviewList.getSize())
+                .reviewResponseDtoList(reviewResponseDtoList)
+                .hasNextPage(reviewList.isFirst())
+                .hasPreviousPage(reviewList.isLast())
+                .build();
+    }
+
 
 }

@@ -22,6 +22,7 @@ repositories {
 }
 
 dependencies {
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -30,6 +31,13 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	//S3 파일업로드
+	implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.1'
+
+
+// 현재 프로젝트에서는 Rest API 규약으로 개발하여 Thymeleaf 문법을 사용하지 않기때문에 저는 적용해 주지 않았습니다.
+//implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.1.RELEASE'
 }
 
 tasks.named('test') {
