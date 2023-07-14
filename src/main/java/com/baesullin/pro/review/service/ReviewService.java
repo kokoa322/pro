@@ -124,6 +124,10 @@ public class ReviewService {
                 .build();
     }
 
+    /**
+     * 리뷰 조회
+     */
+
     public PageInfoResponseDto getReview(long storeId, String socialId, Pageable pageable) {
 
         User myUser = userRepository.findBySocialId(socialId);

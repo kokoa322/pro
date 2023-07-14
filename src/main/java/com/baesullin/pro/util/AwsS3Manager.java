@@ -53,7 +53,15 @@ public class AwsS3Manager {
         }
 
 
-        return String.format("https://%s.s3.amazonaws.com/%s", bucket, fileName);
+
+
+        String baesullinPath = bucket.substring(bucket.lastIndexOf("/")+1);
+        //bucket = bucket.substring(bucket.lastIndexOf("/")+1);
+        bucket = bucket.substring(0, 9);
+
+
+
+        return String.format("https://%s.s3.amazonaws.com/%s/%s", bucket,baesullinPath , fileName);
     }
 
     public void deleteFile(String fileName) {
