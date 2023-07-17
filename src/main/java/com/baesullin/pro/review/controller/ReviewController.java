@@ -92,11 +92,25 @@ public class ReviewController {
             }
         }
 
-            if (user == null) {
-                throw new CustomException(ErrorCode.ACCESS_DENIED);
-            }
-            reviewService.reviewUpdate(reviewRequestDto, user.getUsername(), reviewId);
-            return ResponseEntity.ok("리뷰 수정 성공");
+        if (user == null) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
+        reviewService.reviewUpdate(reviewRequestDto, user.getUsername(), reviewId);
+        return ResponseEntity.ok("리뷰 수정 성공");
     }
+
+    /**
+     * 리뷰 삭제
+     */
+    @DeleteMapping("/review/{reviewId}")
+    public ResponseEntity<?> reviewDelete(User user,
+                                          @PathVariable int reviewId) {
+
+        if (user == null) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+        reviewService.reviewDelete(user.getUsername(), reviewId);
+        return ResponseEntity.ok("리뷰 삭제 성공");
+    }
+}
 

@@ -228,4 +228,33 @@ public class ReviewService {
         // REDIS CACHE
         storeService.updateAvg(store, socialId);
     }
+
+    /**
+     * 리뷰 삭제
+     */
+
+    public void reviewDelete(String socialId, int reviewId) {
+
+        User user = userRepository.findBySocialId(socialId);
+        if (user == null) {
+            throw new CustomException(ErrorCode.NO_USER_FOUND);
+        }   // 유저 유무 확인 예외처리
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new CustomException(ErrorCode.NO_REVIEW_FOUND));                       // 리뷰 유무 확인 예외처리;
+        Store store = storeRepository.findById(review.getStoreId().getId()).orElseThrow(() -> new CustomException(ErrorCode.NO_STORE_FOUND));
+
+        List<ReviewImage> imageList = review.getReviewImageList();
+
+        // todo 1.리뷰삭제 -> 2.이미지 삭제
+        reviewRepository.deleteById(review.getId()); // 1
+        if (!review.getReviewImageList().isEmpty()) { // 2
+            for (ReviewImage reviewImage : imageList) {
+                if (reviewImage.getReviewImageUrl() == null || reviewImage.getReviewImageUrl().equals("")) continue;
+                System.out.println("delete -> " + reviewImage.getReviewImageUrl().substring(reviewImage.getReviewImageUrl().indexOf("com/") + 4));
+                awsS3Manager.deleteFile(reviewImage.getReviewImageUrl().substring(reviewImage.getReviewImageUrl().indexOf("com/") + 4));
+            }
+        }
+        store.removeReview(review);
+        // REDIS CACHE
+        storeService.updateAvg(store, socialId);
+    }
 }

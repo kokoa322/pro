@@ -104,4 +104,8 @@ public class Store implements Serializable {
         this.pointAvg = reviewCount == 0 ? 0 : Double.parseDouble(String.format("%.1f", totalPoint / reviewList.size()));
         return this;
     }
+
+    public void removeReview(Review review) {
+        this.reviewList.remove(review);
+    }
 }
