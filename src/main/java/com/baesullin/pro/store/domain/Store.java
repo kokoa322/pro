@@ -29,6 +29,7 @@ public class Store implements Serializable {
 
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false, precision = 25, scale = 22)
     private BigDecimal latitude;
 
@@ -94,4 +95,17 @@ public class Store implements Serializable {
     private List<Bookmark> bookmarkList = new ArrayList<>();
 
 
+    public Store updatePointAvg() {
+        this.reviewCount = reviewList.size();
+        double totalPoint = 0.0;
+        for (Review review : reviewList) {
+            totalPoint += review.getPoint();
+        }
+        this.pointAvg = reviewCount == 0 ? 0 : Double.parseDouble(String.format("%.1f", totalPoint / reviewList.size()));
+        return this;
+    }
+
+    public void removeReview(Review review) {
+        this.reviewList.remove(review);
+    }
 }

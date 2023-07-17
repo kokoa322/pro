@@ -27,6 +27,11 @@ public class Tag extends TimeStamped {
     @JoinColumn(name = "REVIEW_ID", nullable = false)
     private Review reviewId;
 
+    public Tag(String tag, Review review) {
+        this.tag = tag;
+        this.reviewId = review;
+    }
+
 
 }
 
