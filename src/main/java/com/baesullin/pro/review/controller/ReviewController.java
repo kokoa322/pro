@@ -9,15 +9,20 @@ import com.baesullin.pro.review.service.ReviewService;
 import com.baesullin.pro.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.implementation.bind.MethodDelegationBinder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -52,6 +57,7 @@ public class ReviewController {
         return new SuccessResponse("리뷰 등록 성공");
     }
 
+
     /**
      * 리뷰 조회
      */
@@ -70,12 +76,27 @@ public class ReviewController {
 
     }
 
-//    @GetMapping("/review/{storeId}")
-//    public ResponseEntity<List<ReviewResponseDto>> getStoreReview(@PathVariable int storeId,
-//                                                                  @AuthenticationPrincipal User user) {
-//        List<ReviewResponseDto> reviewList = reviewService.getReview(storeId, user.getUsername());
-//        return new ResponseEntity<>(reviewList, HttpStatus.OK);
-//    }
+    /**
+     * 리뷰 수정
+     */
 
+    @PatchMapping("/review/{reviewId}")
+    public ResponseEntity<?> reviewUpdate(@ModelAttribute @Valid ReviewRequestDto reviewRequestDto,
+                                          BindingResult bindingResult, User user, @PathVariable int reviewId) {
 
-}
+        if (bindingResult.hasErrors()) {
+            List<ObjectError> errorList = bindingResult.getAllErrors();
+            Logger log = LogManager.getLogger(this.getClass());
+            for (ObjectError error : errorList) {
+                log.info("test");
+            }
+        }
+
+            if (user == null) {
+                throw new CustomException(ErrorCode.ACCESS_DENIED);
+            }
+            reviewService.reviewUpdate(reviewRequestDto, user.getUsername(), reviewId);
+            return ResponseEntity.ok("리뷰 수정 성공");
+        }
+    }
+

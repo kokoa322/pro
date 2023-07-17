@@ -78,4 +78,9 @@ public class Review extends TimeStamped {
         this.storeId = store;
     }
 
+    public void update(ReviewRequestDto reviewRequestDto){
+        this.point   = reviewRequestDto.getPoint();
+        this.content = reviewRequestDto.getContent();
+    }
+
 }

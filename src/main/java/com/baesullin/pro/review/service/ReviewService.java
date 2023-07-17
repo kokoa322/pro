@@ -157,4 +157,75 @@ public class ReviewService {
     }
 
 
+    /**
+     * 리뷰 수정
+     */
+    public void reviewUpdate(ReviewRequestDto reviewRequestDto, String socialId, int reviewId) {
+
+        long storeId = reviewRequestDto.getStoreId();
+        User user = userRepository.findBySocialId(socialId);
+        if (user == null)
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new CustomException(ErrorCode.NO_STORE_FOUND));
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new CustomException(ErrorCode.NO_REVIEW_FOUND));
+
+
+        List<MultipartFile> newImageFileList = reviewRequestDto.getImageFile(); // 새로운 이미지 파일
+        List<ReviewImage> oldImageFileList = review.getReviewImageList();     // 기존에 이미지 파일
+        List<ReviewImage> reviewImageUrlList = new ArrayList<>();               // 이미지 파일을 담을 리스트
+
+        List<ReviewImage> reviewImageList = reviewImageRepository.findAllByReviewId(review);
+        List<Integer> reviewImageIdList = new ArrayList<>();               //
+
+
+        // todo 이미지 삭제 후 수정 작업 (1 -> 2)
+        // 1.기존리뷰에 기존 이미지가 있다면 삭제
+        if (!oldImageFileList.isEmpty()) {
+            for (ReviewImage reviewImage : oldImageFileList) {
+                System.out.println("check -> " + reviewImage.getReviewImageUrl());
+                System.out.println("delete -> " + reviewImage.getReviewImageUrl().substring(reviewImage.getReviewImageUrl().indexOf("com/") + 4));
+                awsS3Manager.deleteFile(reviewImage.getReviewImageUrl().substring(reviewImage.getReviewImageUrl().indexOf("com/") + 4));
+            }
+            //reviewImageRepository.deleteAllInBatch(oldImageFileList);
+            reviewImageRepository.deleteAllByReviewId(review);
+        }
+
+        // 2.수정할 이미지가 있다면 업로드
+        if (newImageFileList != null) {
+            System.out.println("newImageFileList != null");
+            for (MultipartFile reviewImageFile : newImageFileList) {
+                String fileDir = awsS3Manager.uploadFile(reviewImageFile);
+                System.out.println("update --> " + fileDir);
+                reviewImageUrlList.add(ReviewImage.builder().reviewId(review).reviewImageUrl(fileDir).build());
+            } // 리뷰이미지 -> url -> 엔티티 변환
+        }
+
+        List<Tag> tagList = new ArrayList<>();               // 태그를 담는 리스트
+        List<String> newTagList = reviewRequestDto.getTagList();   // 새로운 태그
+
+
+        // todo 태그 수정 작업
+        List<Tag> oldTagList = tagRepository.findAllByReviewId(review);
+        System.out.println("log Tag SIZE --> " + oldTagList.size());
+        // 1. 기존 태그 내용이 있다면 전체 삭제
+        // TODO 수정 기능 batch - 잠시 바꿔놨어요
+        // tagRepository.deleteAllInBatch(oldTagList);
+        tagRepository.deleteAllByReviewId(review);
+        // 2. 태그 내용이 있다면 태그 수정
+        if (newTagList != null && newTagList.size() > 0) {
+            for (String newTag : newTagList) {
+                Tag tag = new Tag(newTag, review);
+//                review.addSingleTag(tag);
+                tagList.add(tag);
+            }
+            tagRepository.saveAll(tagList);
+        }
+
+        review.update(reviewRequestDto);
+        reviewRepository.save(review); // 아래의 store.updatePointAvg() 보다 리뷰가 먼저 처리되게 해야한다.
+        reviewImageRepository.saveAll(reviewImageUrlList);
+        // REDIS CACHE
+        storeService.updateAvg(store, socialId);
+    }
 }
