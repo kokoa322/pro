@@ -83,5 +83,12 @@ public class User extends TimeStamped {
     }
 
 
+    //테스트
+    public void userInfo(User user){
+        this.email    = user.getEmail();
+        this.name     = user.getName();
+
+    }
+
 
 }
