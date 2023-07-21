@@ -10,7 +10,6 @@ import com.baesullin.pro.review.dto.ReviewResponseDto;
 import com.baesullin.pro.review.repository.ReviewImageRepository;
 import com.baesullin.pro.review.repository.ReviewQueryDsl;
 import com.baesullin.pro.review.repository.ReviewRepository;
-import com.baesullin.pro.review.repository.SubjectSorceCustom;
 import com.baesullin.pro.store.Service.StoreService;
 import com.baesullin.pro.store.domain.Store;
 import com.baesullin.pro.store.repository.StoreRepository;
@@ -160,7 +159,6 @@ public class ReviewService {
                 .build();
     }
 
-    private SubjectSorceCustom subjectSorceCustom;
     /**
      * 리뷰 수정
      */
