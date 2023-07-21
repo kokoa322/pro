@@ -8,6 +8,7 @@ import com.baesullin.pro.review.dto.PageInfoResponseDto;
 import com.baesullin.pro.review.dto.ReviewRequestDto;
 import com.baesullin.pro.review.dto.ReviewResponseDto;
 import com.baesullin.pro.review.repository.ReviewImageRepository;
+import com.baesullin.pro.review.repository.ReviewQueryDsl;
 import com.baesullin.pro.review.repository.ReviewRepository;
 import com.baesullin.pro.store.Service.StoreService;
 import com.baesullin.pro.store.domain.Store;
@@ -51,6 +52,8 @@ public class ReviewService {
     private final TagRepository tagRepository;
     private final ReviewImageRepository reviewImageRepository;
     private final StoreService storeService;
+    private final ReviewQueryDsl reviewQueryDsl;
+
     /**
      * 리뷰 작성
      */
@@ -156,20 +159,23 @@ public class ReviewService {
                 .build();
     }
 
-
     /**
      * 리뷰 수정
      */
     public void reviewUpdate(ReviewRequestDto reviewRequestDto, String socialId, int reviewId) {
 
+
+        System.out.println(reviewId);
         long storeId = reviewRequestDto.getStoreId();
         User user = userRepository.findBySocialId(socialId);
         if (user == null)
             throw new CustomException(ErrorCode.ACCESS_DENIED);
 
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new CustomException(ErrorCode.NO_STORE_FOUND));
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new CustomException(ErrorCode.NO_REVIEW_FOUND));
-
+        //Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new CustomException(ErrorCode.NO_REVIEW_FOUND));
+        Review review = reviewQueryDsl.findByIdDsl(reviewId);
+        //Review review = reviewList.get(0);
+        System.out.println(review.getId());
 
         List<MultipartFile> newImageFileList = reviewRequestDto.getImageFile(); // 새로운 이미지 파일
         List<ReviewImage> oldImageFileList = review.getReviewImageList();     // 기존에 이미지 파일
