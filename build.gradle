@@ -44,6 +44,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	//jpa
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	testImplementation 'junit:junit:4.13.1'
+	testImplementation 'org.projectlombok:lombok:1.18.26'
 	//lombok
 	compileOnly 'org.projectlombok:lombok'
 	//S3 파일업로드
@@ -61,11 +63,17 @@ dependencies {
 	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
 	implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
 
-
-
+	//테스트 코드
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.7.0")
+	testImplementation('org.junit.jupiter:junit-jupiter:5.7.0')
+	testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.7.0")
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
 // 현재 프로젝트에서는 Rest API 규약으로 개발하여 Thymeleaf 문법을 사용하지 않기때문에 저는 적용해 주지 않았습니다.
 //implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.1.RELEASE'
 }
+
 
 
 def querydslDir = "$buildDir/generated/querydsl"
