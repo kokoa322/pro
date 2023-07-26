@@ -11,6 +11,7 @@ public class UserService {
     @Value("${jwt.secret}")
     private String secretKey;
 
+    //한시간 설정
     private Long expiredMs = 1000 * 60 * 60l;
     public String login(String username, String password){
         //인증과정 생략
