@@ -1,4 +1,4 @@
-package com.baesullin.pro.login.oauth.entity;
+package com.mpnp.baechelin.login.oauth.entity;
 
 import lombok.Getter;
 
