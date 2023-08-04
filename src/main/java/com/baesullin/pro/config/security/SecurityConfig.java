@@ -1,25 +1,29 @@
-package com.mpnp.baechelin.config.security;
+package com.baesullin.pro.config.security;
 
-import com.mpnp.baechelin.common.properties.AppProperties;
-import com.mpnp.baechelin.common.properties.CorsProperties;
-import com.mpnp.baechelin.login.oauth.entity.RoleType;
-import com.mpnp.baechelin.login.jwt.exception.RestAuthenticationEntryPoint;
-import com.mpnp.baechelin.login.jwt.filter.TokenAuthenticationFilter;
-import com.mpnp.baechelin.login.oauth.handler.OAuth2AuthenticationFailureHandler;
-import com.mpnp.baechelin.login.oauth.handler.OAuth2AuthenticationSuccessHandler;
-import com.mpnp.baechelin.login.jwt.handler.TokenAccessDeniedHandler;
-import com.mpnp.baechelin.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import com.mpnp.baechelin.login.oauth.service.CustomOAuth2UserService;
-import com.mpnp.baechelin.login.jwt.AuthTokenProvider;
-import com.mpnp.baechelin.login.jwt.repository.UserRefreshTokenRepository;
+import com.baesullin.pro.common.properties.AppProperties;
+import com.baesullin.pro.common.properties.CorsProperties;
+import com.baesullin.pro.login.jwt.AuthTokenProvider;
+import com.baesullin.pro.login.jwt.exception.RestAuthenticationEntryPoint;
+import com.baesullin.pro.login.jwt.filter.TokenAuthenticationFilter;
+import com.baesullin.pro.login.jwt.handler.TokenAccessDeniedHandler;
+import com.baesullin.pro.login.jwt.repository.UserRefreshTokenRepository;
+import com.baesullin.pro.login.oauth.entity.RoleType;
+import com.baesullin.pro.login.oauth.handler.OAuth2AuthenticationFailureHandler;
+import com.baesullin.pro.login.oauth.handler.OAuth2AuthenticationSuccessHandler;
+import com.baesullin.pro.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
+import com.baesullin.pro.login.oauth.service.CustomOAuth2UserService;
+import com.baesullin.pro.login.oauth.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -51,8 +55,11 @@ public class SecurityConfig {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session을 사용하지 않을 것이기 때문에 stateless 설정 추가
                 .and()
-                .csrf().disable() // csrf 설정 해제
+                .csrf()
+                .ignoringAntMatchers("/h2-console/**")
+                .disable() // csrf 설정 해제
                 .formLogin().disable() // 소셜로그인만 이용할 것이기 때문에 formLogin 해제
+                .httpBasic().and()
                 .httpBasic().disable()
                 .exceptionHandling()
                 .authenticationEntryPoint(new RestAuthenticationEntryPoint()) // 요청이 들어올 시, 인증 헤더를 보내지 않는 경우 401 응답 처리
@@ -60,6 +67,7 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll() // cors 요청 허용
+                .antMatchers("/", "/h2-console/**").permitAll()
                 .antMatchers("/review", "/api/bookmark", "/store/register", "/user").hasAnyAuthority(RoleType.USER.getCode(), RoleType.ADMIN.getCode())
                 .antMatchers("/admin/**").hasAnyAuthority(RoleType.ADMIN.getCode())
                 .antMatchers("/**").permitAll() // 그 외 요청은 모두 허용
@@ -85,6 +93,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+
     /*
      * auth 매니저 설정
      * */
@@ -105,7 +114,7 @@ public class SecurityConfig {
      * 토큰 필터 설정
      * */
     @Bean
-    public  TokenAuthenticationFilter tokenAuthenticationFilter() {
+    public TokenAuthenticationFilter tokenAuthenticationFilter() {
         return new TokenAuthenticationFilter(tokenProvider);
     }
 

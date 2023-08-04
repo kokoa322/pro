@@ -1,7 +1,6 @@
-package com.mpnp.baechelin.login.jwt;
+package com.baesullin.pro.login.jwt;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

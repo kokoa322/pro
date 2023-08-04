@@ -1,9 +1,9 @@
-package com.mpnp.baechelin.login.jwt.filter;
+package com.baesullin.pro.login.jwt.filter;
 
-import com.mpnp.baechelin.exception.CustomException;
-import com.mpnp.baechelin.exception.ErrorCode;
-import com.mpnp.baechelin.login.jwt.AuthToken;
-import com.mpnp.baechelin.login.jwt.AuthTokenProvider;
+import com.baesullin.pro.exception.CustomException;
+import com.baesullin.pro.exception.ErrorCode;
+import com.baesullin.pro.login.jwt.AuthToken;
+import com.baesullin.pro.login.jwt.AuthTokenProvider;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;

@@ -1,7 +1,7 @@
-package com.mpnp.baechelin.login.jwt.handler;
+package com.baesullin.pro.login.jwt.handler;
 
+import com.baesullin.pro.exception.ErrorCode;
 import com.google.gson.JsonObject;
-import com.mpnp.baechelin.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;

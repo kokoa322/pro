@@ -1,6 +1,6 @@
-package com.mpnp.baechelin.login.oauth.entity;
+package com.baesullin.pro.login.oauth.entity;
 
-import com.mpnp.baechelin.user.domain.User;
+import com.baesullin.pro.user.domain.User;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

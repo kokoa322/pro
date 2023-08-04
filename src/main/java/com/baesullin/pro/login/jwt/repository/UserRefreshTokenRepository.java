@@ -1,6 +1,6 @@
-package com.mpnp.baechelin.login.jwt.repository;
+package com.baesullin.pro.login.jwt.repository;
 
-import com.mpnp.baechelin.login.jwt.entity.UserRefreshToken;
+import com.baesullin.pro.login.jwt.entity.UserRefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package com.mpnp.baechelin.login.jwt.exception;
+package com.baesullin.pro.login.jwt.exception;
 
 public class TokenValidFailedException extends RuntimeException {
 

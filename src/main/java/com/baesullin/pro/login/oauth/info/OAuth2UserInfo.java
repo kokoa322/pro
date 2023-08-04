@@ -1,4 +1,4 @@
-package com.mpnp.baechelin.login.oauth.info;
+package com.baesullin.pro.login.oauth.info;
 
 import java.util.Map;
 

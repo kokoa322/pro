@@ -35,6 +35,22 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	//Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	// OAuth2
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client:2.7.0'
+	// jwt
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	// validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+	implementation 'org.hibernate.validator:hibernate-validator'
+	// gson 라이브러리
+	implementation 'com.google.code.gson:gson:2.9.0'
+	//JSON 변환을 위한 Jackson Library
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
 	//log
 	implementation 'org.springframework.boot:spring-boot-starter-log4j2'
 	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
@@ -53,6 +69,8 @@ dependencies {
 	//queryDSL
 	implementation "com.querydsl:querydsl-jpa:5.0.0"
 	implementation "com.querydsl:querydsl-apt:5.0.0"
+	//swagger
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 
 //h2 DB
 	runtimeOnly 'com.h2database:h2'

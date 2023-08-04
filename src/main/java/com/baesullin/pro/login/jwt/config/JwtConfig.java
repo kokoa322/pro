@@ -1,6 +1,6 @@
-package com.mpnp.baechelin.login.jwt.config;
+package com.baesullin.pro.login.jwt.config;
 
-import com.mpnp.baechelin.login.jwt.AuthTokenProvider;
+import com.baesullin.pro.login.jwt.AuthTokenProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

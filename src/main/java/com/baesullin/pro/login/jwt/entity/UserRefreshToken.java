@@ -1,4 +1,4 @@
-package com.mpnp.baechelin.login.jwt.entity;
+package com.baesullin.pro.login.jwt.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;

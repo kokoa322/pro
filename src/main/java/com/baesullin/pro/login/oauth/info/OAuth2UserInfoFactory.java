@@ -1,9 +1,10 @@
-package com.mpnp.baechelin.login.oauth.info;
+package com.baesullin.pro.login.oauth.info;
 
-import com.mpnp.baechelin.login.oauth.entity.ProviderType;
-import com.mpnp.baechelin.login.oauth.info.impl.GoogleOAuth2UserInfo;
-import com.mpnp.baechelin.login.oauth.info.impl.KakaoOAuth2UserInfo;
-import com.mpnp.baechelin.login.oauth.info.impl.NaverOAuth2UserInfo;
+
+import com.baesullin.pro.login.oauth.entity.ProviderType;
+import com.baesullin.pro.login.oauth.info.impl.GoogleOAuth2UserInfo;
+import com.baesullin.pro.login.oauth.info.impl.KakaoOAuth2UserInfo;
+import com.baesullin.pro.login.oauth.info.impl.NaverOAuth2UserInfo;
 
 import java.util.Map;
 

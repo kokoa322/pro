@@ -1,7 +1,7 @@
-package com.mpnp.baechelin.login.jwt.exception;
+package com.baesullin.pro.login.jwt.exception;
 
+import com.baesullin.pro.exception.ErrorCode;
 import com.google.gson.JsonObject;
-import com.mpnp.baechelin.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

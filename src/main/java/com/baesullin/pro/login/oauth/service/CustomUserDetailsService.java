@@ -1,8 +1,8 @@
-package com.mpnp.baechelin.login.oauth.service;
+package com.baesullin.pro.login.oauth.service;
 
-import com.mpnp.baechelin.login.oauth.entity.UserPrincipal;
-import com.mpnp.baechelin.user.domain.User;
-import com.mpnp.baechelin.user.repository.UserRepository;
+import com.baesullin.pro.login.oauth.entity.UserPrincipal;
+import com.baesullin.pro.user.domain.User;
+import com.baesullin.pro.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

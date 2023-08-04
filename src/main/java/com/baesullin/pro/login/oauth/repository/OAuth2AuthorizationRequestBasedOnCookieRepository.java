@@ -1,7 +1,7 @@
-package com.mpnp.baechelin.login.oauth.repository;
+package com.baesullin.pro.login.oauth.repository;
 
 
-import com.mpnp.baechelin.util.CookieUtil;
+import com.baesullin.pro.util.CookieUtil;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;

@@ -1,16 +1,16 @@
-package com.mpnp.baechelin.login.oauth.handler;
+package com.baesullin.pro.login.oauth.handler;
 
-import com.mpnp.baechelin.common.properties.AppProperties;
-import com.mpnp.baechelin.login.oauth.entity.ProviderType;
-import com.mpnp.baechelin.login.oauth.entity.RoleType;
-import com.mpnp.baechelin.login.oauth.info.OAuth2UserInfo;
-import com.mpnp.baechelin.login.oauth.info.OAuth2UserInfoFactory;
-import com.mpnp.baechelin.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import com.mpnp.baechelin.login.jwt.AuthToken;
-import com.mpnp.baechelin.login.jwt.AuthTokenProvider;
-import com.mpnp.baechelin.login.jwt.entity.UserRefreshToken;
-import com.mpnp.baechelin.login.jwt.repository.UserRefreshTokenRepository;
-import com.mpnp.baechelin.util.CookieUtil;
+import com.baesullin.pro.common.properties.AppProperties;
+import com.baesullin.pro.login.jwt.AuthToken;
+import com.baesullin.pro.login.jwt.AuthTokenProvider;
+import com.baesullin.pro.login.jwt.entity.UserRefreshToken;
+import com.baesullin.pro.login.jwt.repository.UserRefreshTokenRepository;
+import com.baesullin.pro.login.oauth.entity.ProviderType;
+import com.baesullin.pro.login.oauth.entity.RoleType;
+import com.baesullin.pro.login.oauth.info.OAuth2UserInfo;
+import com.baesullin.pro.login.oauth.info.OAuth2UserInfoFactory;
+import com.baesullin.pro.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
+import com.baesullin.pro.util.CookieUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,7 +20,6 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -29,8 +28,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 
-import static com.mpnp.baechelin.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
-import static com.mpnp.baechelin.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository.REFRESH_TOKEN;
+import static com.baesullin.pro.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
+import static com.baesullin.pro.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository.REFRESH_TOKEN;
+
 
 // 로그인 성공 시 처리해주는 클래스
 @Component

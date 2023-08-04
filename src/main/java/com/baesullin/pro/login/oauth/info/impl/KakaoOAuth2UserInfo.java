@@ -1,6 +1,7 @@
-package com.mpnp.baechelin.login.oauth.info.impl;
+package com.baesullin.pro.login.oauth.info.impl;
 
-import com.mpnp.baechelin.login.oauth.info.OAuth2UserInfo;
+
+import com.baesullin.pro.login.oauth.info.OAuth2UserInfo;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package com.mpnp.baechelin.login.oauth.common;
+package com.baesullin.pro.login.oauth.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,15 +1,16 @@
-package com.mpnp.baechelin.login.jwt.service;
+package com.baesullin.pro.login.jwt.service;
 
-import com.mpnp.baechelin.common.properties.AppProperties;
-import com.mpnp.baechelin.exception.CustomException;
-import com.mpnp.baechelin.exception.ErrorCode;
-import com.mpnp.baechelin.login.jwt.AuthToken;
-import com.mpnp.baechelin.login.jwt.AuthTokenProvider;
-import com.mpnp.baechelin.login.jwt.entity.UserRefreshToken;
-import com.mpnp.baechelin.login.jwt.repository.UserRefreshTokenRepository;
-import com.mpnp.baechelin.login.oauth.common.AuthResponse;
-import com.mpnp.baechelin.login.oauth.entity.RoleType;
-import com.mpnp.baechelin.util.CookieUtil;
+
+import com.baesullin.pro.common.properties.AppProperties;
+import com.baesullin.pro.login.oauth.common.AuthResponse;
+import com.baesullin.pro.exception.CustomException;
+import com.baesullin.pro.exception.ErrorCode;
+import com.baesullin.pro.login.jwt.AuthToken;
+import com.baesullin.pro.login.jwt.AuthTokenProvider;
+import com.baesullin.pro.login.jwt.entity.UserRefreshToken;
+import com.baesullin.pro.login.jwt.repository.UserRefreshTokenRepository;
+import com.baesullin.pro.login.oauth.entity.RoleType;
+import com.baesullin.pro.util.CookieUtil;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

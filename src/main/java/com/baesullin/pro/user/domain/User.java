@@ -82,7 +82,22 @@ public class User extends TimeStamped {
         return this.socialId;
     }
 
-
+    @Builder
+    public User(String socialId,                String name,
+                String email,
+                String emailVerifiedYn,
+                String profileImageUrl,
+                ProviderType providerType,
+                RoleType roleType) {
+        this.socialId = socialId;
+        this.name = name;
+        this.password = "NO_PASS";
+        this.email = email != null ? email : "NO_EMAIL";
+        this.emailVerifiedYn = emailVerifiedYn;
+        this.profileImageUrl = profileImageUrl != null ? profileImageUrl : "";
+        this.providerType = providerType;
+        this.roleType = roleType;
+    }
 
 
 

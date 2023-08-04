@@ -1,4 +1,4 @@
-package com.mpnp.baechelin.login.oauth.exception;
+package com.baesullin.pro.login.oauth.exception;
 
 public class OAuthProviderMissMatchException extends RuntimeException {
 

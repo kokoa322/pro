@@ -1,14 +1,14 @@
-package com.mpnp.baechelin.login.oauth.service;
+package com.baesullin.pro.login.oauth.service;
 
-import com.mpnp.baechelin.login.oauth.entity.ProviderType;
-import com.mpnp.baechelin.login.oauth.entity.RoleType;
-import com.mpnp.baechelin.login.oauth.entity.UserPrincipal;
-import com.mpnp.baechelin.login.oauth.exception.OAuthProviderMissMatchException;
-import com.mpnp.baechelin.exception.ErrorCode;
-import com.mpnp.baechelin.login.oauth.info.OAuth2UserInfo;
-import com.mpnp.baechelin.login.oauth.info.OAuth2UserInfoFactory;
-import com.mpnp.baechelin.user.domain.User;
-import com.mpnp.baechelin.user.repository.UserRepository;
+import com.baesullin.pro.exception.ErrorCode;
+import com.baesullin.pro.login.oauth.entity.ProviderType;
+import com.baesullin.pro.login.oauth.entity.RoleType;
+import com.baesullin.pro.login.oauth.entity.UserPrincipal;
+import com.baesullin.pro.login.oauth.exception.OAuthProviderMissMatchException;
+import com.baesullin.pro.login.oauth.info.OAuth2UserInfo;
+import com.baesullin.pro.login.oauth.info.OAuth2UserInfoFactory;
+import com.baesullin.pro.user.domain.User;
+import com.baesullin.pro.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;

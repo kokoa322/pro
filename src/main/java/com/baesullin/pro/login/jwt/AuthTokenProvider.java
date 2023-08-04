@@ -1,7 +1,7 @@
-package com.mpnp.baechelin.login.jwt;
+package com.baesullin.pro.login.jwt;
 
-import com.mpnp.baechelin.login.jwt.exception.TokenValidFailedException;
-import com.mpnp.baechelin.util.HeaderUtil;
+import com.baesullin.pro.login.jwt.exception.TokenValidFailedException;
+import com.baesullin.pro.util.HeaderUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;

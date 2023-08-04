@@ -1,7 +1,7 @@
-package com.mpnp.baechelin.login.oauth.handler;
+package com.baesullin.pro.login.oauth.handler;
 
-import com.mpnp.baechelin.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import com.mpnp.baechelin.util.CookieUtil;
+import com.baesullin.pro.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
+import com.baesullin.pro.util.CookieUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -22,7 +22,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
     /* 로그인 실패 시 처리 커스터마이징
     *  로그인을 실패했을 경우, 쿠키에 저장한 리프레시 토큰을 삭제하고, 에러 uri로 리다이렉트 시켜야한다.
-    * */
+    */
     @Override
     public void onAuthenticationFailure(
             HttpServletRequest request,

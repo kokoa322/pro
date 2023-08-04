@@ -1,7 +1,7 @@
-package com.mpnp.baechelin.login.jwt.controller;
+package com.baesullin.pro.login.jwt.controller;
 
-import com.mpnp.baechelin.login.oauth.common.AuthResponse;
-import com.mpnp.baechelin.login.jwt.service.TokenService;
+import com.baesullin.pro.login.jwt.service.TokenService;
+import com.baesullin.pro.login.oauth.common.AuthResponse;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

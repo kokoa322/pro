@@ -1,10 +1,11 @@
-package com.mpnp.baechelin.common.properties;
+package com.baesullin.pro.common.properties;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 // application.yml에서 app 설정을 가져오기 위한 클래스
 @Getter
 @ConfigurationProperties(prefix = "app")
+@Configuration
 public class AppProperties {
 
     private final Auth auth = new Auth();
