@@ -53,7 +53,7 @@ public class ReviewController {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
 
-        reviewService.review(reviewRequestDto, user.getUsername());
+        //reviewService.review(reviewRequestDto, user.getUsername());
         return new SuccessResponse("리뷰 등록 성공");
     }
 
@@ -70,9 +70,9 @@ public class ReviewController {
             return new ResponseEntity<>(pageInfoResponseDto, HttpStatus.OK);
         }
 
-        PageInfoResponseDto pageInfoResponseDto = reviewService.getReview(storeId, user.getUsername(), pageable);
-        return new ResponseEntity<>(pageInfoResponseDto, HttpStatus.OK);
-
+       // PageInfoResponseDto pageInfoResponseDto = reviewService.getReview(storeId, user.getUsername(), pageable);
+        //return new ResponseEntity<>(pageInfoResponseDto, HttpStatus.OK);
+        return null;
 
     }
 
@@ -95,7 +95,7 @@ public class ReviewController {
         if (user == null) {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
-        reviewService.reviewUpdate(reviewRequestDto, user.getUsername(), reviewId);
+      //  reviewService.reviewUpdate(reviewRequestDto, user.getUsername(), reviewId);
         return ResponseEntity.ok("리뷰 수정 성공");
     }
 
@@ -109,7 +109,7 @@ public class ReviewController {
         if (user == null) {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
-        reviewService.reviewDelete(user.getUsername(), reviewId);
+        //reviewService.reviewDelete(user.getUsername(), reviewId);
         return ResponseEntity.ok("리뷰 삭제 성공");
     }
 }

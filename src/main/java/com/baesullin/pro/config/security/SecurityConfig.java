@@ -1,29 +1,25 @@
 package com.baesullin.pro.config.security;
 
+import com.baesullin.pro.login.oauth.entity.RoleType;
+import com.baesullin.pro.login.jwt.repository.UserRefreshTokenRepository;
+import com.baesullin.pro.login.oauth.service.CustomOAuth2UserService;
 import com.baesullin.pro.common.properties.AppProperties;
 import com.baesullin.pro.common.properties.CorsProperties;
 import com.baesullin.pro.login.jwt.AuthTokenProvider;
 import com.baesullin.pro.login.jwt.exception.RestAuthenticationEntryPoint;
 import com.baesullin.pro.login.jwt.filter.TokenAuthenticationFilter;
 import com.baesullin.pro.login.jwt.handler.TokenAccessDeniedHandler;
-import com.baesullin.pro.login.jwt.repository.UserRefreshTokenRepository;
-import com.baesullin.pro.login.oauth.entity.RoleType;
 import com.baesullin.pro.login.oauth.handler.OAuth2AuthenticationFailureHandler;
 import com.baesullin.pro.login.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import com.baesullin.pro.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
-import com.baesullin.pro.login.oauth.service.CustomOAuth2UserService;
-import com.baesullin.pro.login.oauth.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -46,7 +42,6 @@ public class SecurityConfig {
     private final TokenAccessDeniedHandler tokenAccessDeniedHandler;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
 
-
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -56,7 +51,7 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session을 사용하지 않을 것이기 때문에 stateless 설정 추가
                 .and()
                 .csrf()
-                .ignoringAntMatchers("/h2-console/**")
+                //.ignoringAntMatchers("/h2-console/**")
                 .disable() // csrf 설정 해제
                 .formLogin().disable() // 소셜로그인만 이용할 것이기 때문에 formLogin 해제
                 .httpBasic().and()
@@ -67,7 +62,7 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll() // cors 요청 허용
-                .antMatchers("/", "/h2-console/**").permitAll()
+                //.antMatchers("/", "/h2-console/**").permitAll()
                 .antMatchers("/review", "/api/bookmark", "/store/register", "/user").hasAnyAuthority(RoleType.USER.getCode(), RoleType.ADMIN.getCode())
                 .antMatchers("/admin/**").hasAnyAuthority(RoleType.ADMIN.getCode())
                 .antMatchers("/**").permitAll() // 그 외 요청은 모두 허용
@@ -92,7 +87,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     /*
      * auth 매니저 설정
