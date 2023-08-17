@@ -20,6 +20,7 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
     // cookie의 request를 가져오는 로직
     @Override
     public OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
+        System.out.println("loadAuthorizationRequest");
         return CookieUtil.getCookie(request, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME)
                 .map(cookie -> CookieUtil.deserialize(cookie, OAuth2AuthorizationRequest.class)) // map : optional에서 제공하는 메서드. 원하는 형태로 Optional 객체 변환
                 .orElse(null);
@@ -27,10 +28,14 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
 
     @Override
     public void saveAuthorizationRequest(OAuth2AuthorizationRequest authorizationRequest, HttpServletRequest request, HttpServletResponse response) {
+        System.out.println(request.getParameter("code"));
+
+        System.out.println("saveAuthorizationRequest");
         /* 인가 요청이 들어오지 않으면 쿠키를 삭제해준다.
         *  왜? 기존에 있던 쿠키도 삭제해주는건가?
         * */
        if (authorizationRequest == null) {
+            System.out.println("authorizationRequest");
             CookieUtil.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
             CookieUtil.deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
             CookieUtil.deleteCookie(request, response, REFRESH_TOKEN);
@@ -47,6 +52,7 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
     // deprecated 되었지만 implements한 구현체에 존재하는 메서드이기 때문에 반드시 override 해주어야함.
     @Override
     public OAuth2AuthorizationRequest removeAuthorizationRequest(HttpServletRequest request) {
+        System.out.println("removeAuthorizationRequest(HttpServletRequest request)");
         // loadAuthorizationRequest는 request가 없을 때 null을 리턴하므로 cookie를 삭제하는 것과 같음.
         return this.loadAuthorizationRequest(request);
     }
@@ -54,6 +60,7 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
     // 해당 프로젝트에서 사용하지 않음.
     @Override
     public OAuth2AuthorizationRequest removeAuthorizationRequest(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("removeAuthorizationRequest");
         return this.loadAuthorizationRequest(request);
     }
 

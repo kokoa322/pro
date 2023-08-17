@@ -14,7 +14,6 @@ import java.util.List;
 // application.yml에서 app 설정을 가져오기 위한 클래스
 @Getter
 @ConfigurationProperties(prefix = "app")
-@Configuration
 public class AppProperties {
 
     private final Auth auth = new Auth();

@@ -34,6 +34,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        System.out.println("loadUser");
         // DefaultOAuth2UserService 의 loadUser 클래스를 사용하기 위해 super 키워드 사용. this 키워드는 내 클래스나 필드에 사용.
         OAuth2User user = super.loadUser(userRequest);
 
@@ -52,6 +53,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     // 유저 정보를 DB에 저장하거나 업데이트하는 메소드
     private OAuth2User process(OAuth2UserRequest userRequest, OAuth2User user) {
+        System.out.println("process");
         // 요청한 유저 정보에 들어있는 provider type을 가져온다.
         ProviderType providerType = ProviderType.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
 

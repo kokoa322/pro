@@ -39,6 +39,7 @@ public class AuthToken {
     }
 
     private String createAuthToken(String id, String role, Date expiry) {
+        System.out.println("createAuthToken(String id, String role, Date expiry)");
         return Jwts.builder()
                 .setSubject(id)
                 .claim(AUTHORITIES_KEY, role) // jwt payload에 private claims를 담는다. claim -> payload에 들어가는 일련의 정보

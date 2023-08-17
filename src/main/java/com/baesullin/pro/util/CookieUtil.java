@@ -13,6 +13,7 @@ import java.util.Optional;
 public class CookieUtil {
 
     public static Optional<Cookie> getCookie(HttpServletRequest request, String name) {
+        System.out.println("getCookie");
         Cookie[] cookies = request.getCookies();
 
         // 쿠키가 있을 때
@@ -28,13 +29,13 @@ public class CookieUtil {
 
     // 쿠키 생성
     public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
+        System.out.println("addCookie");
         ResponseCookie cookie = ResponseCookie.from(name, value)
-                .domain(".bae-chelin.com")
+                //.domain(".bae-chelin.com")
                 .path("/")
                 .httpOnly(true)
                 .maxAge(maxAge)
                 .build();
-
         response.addHeader("Set-Cookie", cookie.toString());
     }
 
@@ -59,11 +60,13 @@ public class CookieUtil {
     }
 
     public static String serialize(Object obj) {
+        System.out.println("serialize");
         return Base64.getUrlEncoder()
                 .encodeToString(SerializationUtils.serialize(obj));
     }
 
     public static <T> T deserialize(Cookie cookie, Class<T> cls) {
+        System.out.println("deserialize");
         return cls.cast(
                 SerializationUtils.deserialize(
                         Base64.getUrlDecoder().decode(cookie.getValue())

@@ -12,13 +12,16 @@ import com.baesullin.pro.login.jwt.handler.TokenAccessDeniedHandler;
 import com.baesullin.pro.login.oauth.handler.OAuth2AuthenticationFailureHandler;
 import com.baesullin.pro.login.oauth.handler.OAuth2AuthenticationSuccessHandler;
 import com.baesullin.pro.login.oauth.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
+import com.baesullin.pro.login.oauth.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -39,8 +42,14 @@ public class SecurityConfig {
     private final AppProperties appProperties;
     private final AuthTokenProvider tokenProvider;
     private final CustomOAuth2UserService oAuth2UserService;
+    private final CustomUserDetailsService userDetailsService;
     private final TokenAccessDeniedHandler tokenAccessDeniedHandler;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
+
+    protected void filterChain(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder());
+    }
 
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -51,10 +60,9 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session을 사용하지 않을 것이기 때문에 stateless 설정 추가
                 .and()
                 .csrf()
-                //.ignoringAntMatchers("/h2-console/**")
+                .ignoringAntMatchers("/h2-console/**")
                 .disable() // csrf 설정 해제
                 .formLogin().disable() // 소셜로그인만 이용할 것이기 때문에 formLogin 해제
-                .httpBasic().and()
                 .httpBasic().disable()
                 .exceptionHandling()
                 .authenticationEntryPoint(new RestAuthenticationEntryPoint()) // 요청이 들어올 시, 인증 헤더를 보내지 않는 경우 401 응답 처리
@@ -62,10 +70,10 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll() // cors 요청 허용
-                //.antMatchers("/", "/h2-console/**").permitAll()
+                .antMatchers("/", "/h2-console/**").permitAll() // 그 외 요청은 모두 허용
                 .antMatchers("/review", "/api/bookmark", "/store/register", "/user").hasAnyAuthority(RoleType.USER.getCode(), RoleType.ADMIN.getCode())
                 .antMatchers("/admin/**").hasAnyAuthority(RoleType.ADMIN.getCode())
-                .antMatchers("/**").permitAll() // 그 외 요청은 모두 허용
+                //.antMatchers("/**").permitAll() // 그 외 요청은 모두 허용
                 .anyRequest().authenticated() // 위의 요청 외의 요청은 무조건 권한검사
                 .and()
                 .oauth2Login() // auth2 로그인 활성화
@@ -88,11 +96,16 @@ public class SecurityConfig {
         return http.build();
     }
 
+
+    public void filterChain(WebSecurity web)throws Exception{
+        web.ignoring().antMatchers("/h2-console/**");
+    }
     /*
      * auth 매니저 설정
      * */
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
     protected AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        System.out.println("authenticationManager");
         return authenticationConfiguration.getAuthenticationManager();
     }
 
@@ -101,6 +114,7 @@ public class SecurityConfig {
      * */
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
+        System.out.println("passwordEncoder");
         return new BCryptPasswordEncoder();
     }
 
@@ -108,7 +122,8 @@ public class SecurityConfig {
      * 토큰 필터 설정
      * */
     @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter() {
+    public  TokenAuthenticationFilter tokenAuthenticationFilter() {
+        System.out.println("tokenAuthenticationFilter");
         return new TokenAuthenticationFilter(tokenProvider);
     }
 
@@ -118,6 +133,7 @@ public class SecurityConfig {
      * */
     @Bean
     public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository() {
+        System.out.println("oAuth2AuthorizationRequestBasedOnCookieRepository");
         return new OAuth2AuthorizationRequestBasedOnCookieRepository();
     }
 
@@ -126,6 +142,7 @@ public class SecurityConfig {
      * */
     @Bean
     public OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler() {
+        System.out.println("oAuth2AuthenticationSuccessHandler");
         return new OAuth2AuthenticationSuccessHandler(
                 tokenProvider,
                 appProperties,
@@ -139,6 +156,7 @@ public class SecurityConfig {
      * */
     @Bean
     public OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler() {
+        System.out.println("oAuth2AuthenticationFailureHandler");
         return new OAuth2AuthenticationFailureHandler(oAuth2AuthorizationRequestBasedOnCookieRepository());
     }
 
@@ -147,6 +165,8 @@ public class SecurityConfig {
      * */
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+
+        System.out.println("corsConfigurationSource");
 
         CorsConfiguration corsConfig = new CorsConfiguration();
         corsConfig.setAllowedHeaders(Arrays.asList(corsProperties.getAllowedHeaders().split(",")));

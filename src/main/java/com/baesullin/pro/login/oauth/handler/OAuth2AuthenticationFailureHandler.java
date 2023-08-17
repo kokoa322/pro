@@ -32,13 +32,13 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
             HttpServletResponse response,
             AuthenticationException exception) throws IOException, ServletException {
 
+        System.out.println("onAuthenticationFailure");
         // 리프레시 토큰을 저장한 쿠키에 들어있는 redirect uri를 가져온다.
         String targetUrl = CookieUtil.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
                 .map(Cookie::getValue)
                 .orElse("/");
 
 
-        System.out.println(targetUrl);
         exception.printStackTrace(); // 에러 로그 모두 출력
 
         // 기존의 url을 에러 메세지가 담긴 url로 변경
@@ -50,6 +50,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
         authorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
 
         // 에러 메세지가 담긴 url로 리다이렉트 시킨다.
+
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }

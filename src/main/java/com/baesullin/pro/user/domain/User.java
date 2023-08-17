@@ -20,6 +20,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "USERS")
 public class User extends TimeStamped {
 
     @JsonIgnore
