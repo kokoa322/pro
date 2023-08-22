@@ -53,7 +53,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             logger.debug("이미 보내진(커밋된) 응답이므로 " + targetUrl + "으로 리다이렉트 할 수 없습니다.");
             return;
         }
-        System.out.println(targetUrl);
+        System.out.println("targetUrl : "+targetUrl);
         clearAuthenticationAttributes(request, response);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }

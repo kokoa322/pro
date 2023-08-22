@@ -50,6 +50,7 @@ public class AuthToken {
 
     // 토큰 유효성 검사
     public boolean tokenValidate() {
+        System.out.println("tokenValidate");
         Jws<Claims> claimsJws = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()

@@ -64,6 +64,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             log.info(e.toString().split(":")[1].trim());
             request.setAttribute("exception", ErrorCode.INVALID_ACCESS_TOKEN.getCode());
         } catch (CustomException e) {
+            System.out.println("에러가 발생했을 때, request에 attribute를 세팅하고 RestAuthenticationEntryPoint로 request를 넘겨준다.");
             log.info("Access Token이 존재하지 않습니다.");
             request.setAttribute("exception", ErrorCode.ACCESS_TOKEN_NOT_EXIST.getCode());
         }

@@ -5,7 +5,6 @@ import com.baesullin.pro.exception.CustomException;
 import com.baesullin.pro.exception.ErrorCode;
 import com.baesullin.pro.review.dto.ReviewRequestDto;
 import com.baesullin.pro.review.service.ReviewService;
-import com.baesullin.pro.user.domain.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;

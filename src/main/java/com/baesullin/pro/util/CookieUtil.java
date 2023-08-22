@@ -47,7 +47,7 @@ public class CookieUtil {
             for (Cookie cookie : cookies) {
                 if (name.equals(cookie.getName())) {
                     ResponseCookie deleteCookie = ResponseCookie.from(name, "")
-                            .domain("bae-chelin.com")
+                            //.domain("bae-chelin.com")
                             .path("/")
                             .httpOnly(true)
                             .maxAge(0)

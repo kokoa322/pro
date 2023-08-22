@@ -28,8 +28,6 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
 
     @Override
     public void saveAuthorizationRequest(OAuth2AuthorizationRequest authorizationRequest, HttpServletRequest request, HttpServletResponse response) {
-        System.out.println(request.getParameter("code"));
-
         System.out.println("saveAuthorizationRequest");
         /* 인가 요청이 들어오지 않으면 쿠키를 삭제해준다.
         *  왜? 기존에 있던 쿠키도 삭제해주는건가?

@@ -112,6 +112,7 @@ public class TokenService {
         int cookieMaxAge = (int) refreshTokenExpiry / 60;
         CookieUtil.deleteCookie(request, response, REFRESH_TOKEN);
         CookieUtil.addCookie(response, REFRESH_TOKEN, authRefreshToken.getToken(), cookieMaxAge);
+        ;
 
 
         return new AuthResponse(newAccessToken.getToken());
