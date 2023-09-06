@@ -1,12 +1,25 @@
 package com.baesullin.pro;
 
 import com.baesullin.pro.common.properties.AppProperties;
+import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication
+@EnableBatchProcessing
+@EnableJpaAuditing
+@EnableCaching
+@EnableScheduling
+@EnableSchedulerLock(defaultLockAtMostFor = "PT30S")
+//@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @EnableConfigurationProperties(AppProperties.class)
+//@PropertySources({@PropertySource("classpath:application-key.properties")})
+@SpringBootApplication
 public class ProApplication {
 
 	public static void main(String[] args) {

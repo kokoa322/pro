@@ -1,7 +1,12 @@
 package com.baesullin.pro.store.domain;
 
+import com.baesullin.pro.api.dto.LocationInfoDto;
+import com.baesullin.pro.api.model.PublicApiV1Form;
+import com.baesullin.pro.api.model.PublicApiV2Form;
 import com.baesullin.pro.bookmark.domain.Bookmark;
+import com.baesullin.pro.common.DataClarification;
 import com.baesullin.pro.review.domain.Review;
+import com.baesullin.pro.storeApiUpdate.StoreApiUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -48,7 +53,7 @@ public class Store implements Serializable {
     @Column(nullable = false)
     private String parking;
 
-    //    @Column(nullable = false)
+    @Column(nullable = false)
     private String phoneNumber;
 
     @Column(nullable = false)
@@ -95,6 +100,45 @@ public class Store implements Serializable {
     private List<Bookmark> bookmarkList = new ArrayList<>();
 
 
+
+    public Store(LocationInfoDto.LocationResponse sr, PublicApiV2Form.ServList servList, List<String> barrierTagList) {
+        this.id = sr.getStoreId();
+        this.name = sr.getStoreName();
+        this.latitude = new BigDecimal(servList.getFaclLat());
+        this.longitude = new BigDecimal(servList.getFaclLng());
+        this.address = DataClarification.clarifyString(servList.getLcMnad());
+        this.elevator = barrierTagList.contains("elevator") ? "Y" : "N";
+        this.heightDifferent = barrierTagList.contains("height_different") ? "Y" : "N";
+        this.toilet = barrierTagList.contains("toilet") ? "Y" : "N";
+        this.parking = barrierTagList.contains("parking") ? "Y" : "N";
+        this.approach = barrierTagList.contains("approach") ? "Y" : "N";
+
+        this.phoneNumber = sr.getPhoneNumber();
+        this.category = sr.getCategory();
+    }
+
+    public Store(PublicApiV1Form.Row row) {
+        //storeId - 임시
+        this.id = row.getStoreId();
+        this.name = row.getSISULNAME();
+        this.address = DataClarification.clarifyString(row.getADDR());
+        this.phoneNumber = row.getTEL();
+        //접근로
+        this.approach = row.getST1();
+        //주차장
+        this.parking = row.getST2();
+        //높이차이제거
+        this.heightDifferent = row.getST3();
+        //승강기
+        this.elevator = row.getST4();
+        //화장실
+        this.toilet = row.getST5();
+
+        this.latitude = row.getLatitude();
+        this.longitude = row.getLongitude();
+        this.category = row.getCategory();
+    }
+
     public Store updatePointAvg() {
         this.reviewCount = reviewList.size();
         double totalPoint = 0.0;
@@ -108,4 +152,65 @@ public class Store implements Serializable {
     public void removeReview(Review review) {
         this.reviewList.remove(review);
     }
+    public void removeBookmark(Bookmark bookmark) {
+        this.bookmarkList.remove(bookmark);
+    }
+
+    public Store updateBookmarkCount() {
+        this.bookMarkCount = this.getBookmarkList().size();
+        return this;
+    }
+
+    public Store(StoreApiUpdate row){
+        this.id          = row.getId();
+        this.name        = row.getName();
+        this.address     = row.getAddress();
+        this.phoneNumber = row.getPhoneNumber();
+
+        /* 태그 */
+        //접근로
+        this.approach        = row.getApproach();
+        //주차장
+        this.parking         = row.getParking();
+        //승강기
+        this.elevator        = row.getElevator();
+        //화장실
+        this.toilet          = row.getToilet();
+        //높이차이제거
+        this.heightDifferent = row.getHeightDifferent();
+
+        this.category  = row.getCategory();
+        this.latitude  = row.getLatitude();
+        this.longitude = row.getLongitude();
+    }
+
+
+    public void apiUpdate(StoreApiUpdate row) {
+        this.id          = row.getId();
+        this.name        = row.getName();
+        this.address     = row.getAddress();
+        this.phoneNumber = row.getPhoneNumber();
+
+        /* 태그 */
+        //접근로
+        this.approach        = row.getApproach();
+        //주차장
+        this.parking         = row.getParking();
+        //승강기
+        this.elevator        = row.getElevator();
+        //화장실
+        this.toilet          = row.getToilet();
+        //높이차이제거
+        this.heightDifferent = row.getHeightDifferent();
+
+        this.category  = row.getCategory();
+        this.latitude  = row.getLatitude();
+        this.longitude = row.getLongitude();
+    }
+
+    public void removeReviewImage(Review review) {
+        this.reviewList.remove(review);
+    }
+
+
 }

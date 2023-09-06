@@ -5,14 +5,16 @@ import com.baesullin.pro.exception.ErrorCode;
 import com.baesullin.pro.review.domain.Review;
 import com.baesullin.pro.review.domain.ReviewImage;
 import com.baesullin.pro.review.dto.PageInfoResponseDto;
+import com.baesullin.pro.review.dto.ReviewMainResponseDto;
 import com.baesullin.pro.review.dto.ReviewRequestDto;
 import com.baesullin.pro.review.dto.ReviewResponseDto;
 import com.baesullin.pro.review.repository.ReviewImageRepository;
 import com.baesullin.pro.review.repository.ReviewQueryDsl;
+import com.baesullin.pro.review.repository.ReviewQueryRepository;
 import com.baesullin.pro.review.repository.ReviewRepository;
-import com.baesullin.pro.store.Service.StoreService;
 import com.baesullin.pro.store.domain.Store;
 import com.baesullin.pro.store.repository.StoreRepository;
+import com.baesullin.pro.store.service.StoreService;
 import com.baesullin.pro.tag.domain.Tag;
 import com.baesullin.pro.tag.repository.TagRepository;
 import com.baesullin.pro.user.domain.User;
@@ -20,16 +22,9 @@ import com.baesullin.pro.user.repository.UserRepository;
 import com.baesullin.pro.util.AwsS3Manager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
@@ -51,6 +46,7 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final TagRepository tagRepository;
     private final ReviewImageRepository reviewImageRepository;
+    private final ReviewQueryRepository reviewQueryRepository;
     private final StoreService storeService;
     private final ReviewQueryDsl reviewQueryDsl;
 
@@ -172,8 +168,8 @@ public class ReviewService {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
 
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new CustomException(ErrorCode.NO_STORE_FOUND));
-        //Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new CustomException(ErrorCode.NO_REVIEW_FOUND));
-        Review review = reviewQueryDsl.findByIdDsl(reviewId);
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new CustomException(ErrorCode.NO_REVIEW_FOUND));
+        //Review review = reviewQueryDsl.findByIdDsl(reviewId);
         //Review review = reviewList.get(0);
         System.out.println(review.getId());
 
@@ -262,6 +258,12 @@ public class ReviewService {
         store.removeReview(review);
         // REDIS CACHE
         storeService.updateAvg(store, socialId);
+    }
+
+    public List<ReviewMainResponseDto> getRecentReview(BigDecimal lat, BigDecimal lng, int limit) {
+        return reviewQueryRepository
+                .findRecentReviews(lat, lng, limit)
+                .stream().map(review -> new ReviewMainResponseDto(review, review.getStoreId(), review.getUserId())).collect(Collectors.toList());
     }
 
 

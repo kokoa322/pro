@@ -4,13 +4,12 @@ import com.baesullin.pro.common.SuccessResponse;
 import com.baesullin.pro.exception.CustomException;
 import com.baesullin.pro.exception.ErrorCode;
 import com.baesullin.pro.review.dto.PageInfoResponseDto;
+import com.baesullin.pro.review.dto.ReviewMainResponseDto;
 import com.baesullin.pro.review.dto.ReviewRequestDto;
 import com.baesullin.pro.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.implementation.bind.MethodDelegationBinder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -111,6 +110,13 @@ public class ReviewController {
         return ResponseEntity.ok("리뷰 삭제 성공");
     }
 
+    // 반경 넓히기
+    @GetMapping("/recent-review")
+    public List<ReviewMainResponseDto> recentReview(@RequestParam(required = false) BigDecimal lat,
+                                                    @RequestParam(required = false) BigDecimal lng,
+                                                    @RequestParam int limit) {
+        return reviewService.getRecentReview(lat, lng, limit);
+    }
 
 }
 

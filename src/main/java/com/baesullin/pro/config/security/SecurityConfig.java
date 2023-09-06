@@ -60,7 +60,6 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session을 사용하지 않을 것이기 때문에 stateless 설정 추가
                 .and()
                 .csrf()
-                .ignoringAntMatchers("/h2-console/**")
                 .disable() // csrf 설정 해제
                 .formLogin().disable() // 소셜로그인만 이용할 것이기 때문에 formLogin 해제
                 .httpBasic().disable()
@@ -70,7 +69,7 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll() // cors 요청 허용
-                .antMatchers("/", "/h2-console/**").permitAll() // 그 외 요청은 모두 허용
+                .antMatchers("/").permitAll() // 그 외 요청은 모두 허용
                 .antMatchers("/review", "/api/bookmark", "/store/register", "/user").hasAnyAuthority(RoleType.USER.getCode(), RoleType.ADMIN.getCode())
                 .antMatchers("/admin/**").hasAnyAuthority(RoleType.ADMIN.getCode())
                 //.antMatchers("/**").permitAll() // 그 외 요청은 모두 허용
@@ -97,9 +96,7 @@ public class SecurityConfig {
     }
 
 
-    public void filterChain(WebSecurity web)throws Exception{
-        web.ignoring().antMatchers("/h2-console/**");
-    }
+
     /*
      * auth 매니저 설정
      * */

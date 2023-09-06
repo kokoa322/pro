@@ -1,6 +1,6 @@
 package com.baesullin.pro.review.repository;
 
-import com.baesullin.pro.config.quaryDsl.QuerydslConfig;
+//import com.baesullin.pro.config.quaryDsl.QuerydslConfig;
 import com.baesullin.pro.review.domain.QReview;
 import com.baesullin.pro.review.domain.Review;
 import com.querydsl.core.Tuple;

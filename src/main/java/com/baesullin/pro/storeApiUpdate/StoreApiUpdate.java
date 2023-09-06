@@ -1,5 +1,7 @@
 package com.baesullin.pro.storeApiUpdate;
 
+import com.baesullin.pro.config.batch.requestDto.StoreDTO;
+import com.baesullin.pro.store.domain.Store;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -85,5 +87,57 @@ public class StoreApiUpdate {
 //        this.category  = row.getCategory();
 //    }
 
+
+    public StoreApiUpdate(StoreDTO row) {
+
+        //storeId - 임시
+        this.id          = row.getStoreId();
+        this.name        = row.getSISULNAME();
+        this.address     = row.getADDR();
+        this.phoneNumber = row.getTEL();
+
+
+        //접근로
+        this.approach        = row.getST1();
+        //주차장
+        this.parking         = row.getST2();
+        //높이차이제거
+        this.heightDifferent = row.getST3();
+        //승강기
+        this.elevator        = row.getST4();
+        //화장실
+        this.toilet          = row.getST5();
+
+
+        this.latitude  = row.getLatitude();
+        this.longitude = row.getLongitude();
+        this.category  = row.getCategory();
+    }
+
+    public StoreApiUpdate(Store row) {
+
+        //storeId - 임시
+        this.id          = row.getId();
+        this.name        = row.getName();
+        this.address     = row.getAddress();
+        this.phoneNumber = row.getPhoneNumber();
+
+
+        //접근로
+        this.approach        = row.getApproach();
+        //주차장
+        this.parking         = row.getParking();
+        //높이차이제거
+        this.heightDifferent = row.getHeightDifferent();
+        //승강기
+        this.elevator        = row.getElevator();
+        //화장실
+        this.toilet          = row.getToilet();
+
+
+        this.latitude  = row.getLatitude();
+        this.longitude = row.getLongitude();
+        this.category  = row.getCategory();
+    }
 
 }
