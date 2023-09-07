@@ -67,23 +67,29 @@ public class ApiUpdateThread extends Thread {
 
             headers = setHttpHeaders();
             log.info("thread "+ threadCount +" --> "+"{}, {}, print", siDoNm, cggNm);
+
+            log.info("publicKey --> "+"{}", publicKey);
             // URI 생성
             String publicV2Uri = "http://apis.data.go.kr/B554287/DisabledPersonConvenientFacility/getDisConvFaclList";
 
+
             URI uri = UriComponentsBuilder
                     .fromUriString(publicV2Uri)
-                    .queryParam("serviceKey", publicKey)
                     .queryParam("numOfRows", "1000")
                     .queryParam("pageNo", String.valueOf(pageNo))
                     .queryParam("siDoNm", siDoNm)
                     .queryParam("cggNm", cggNm)
                     .queryParam("faclTyCd", "UC0B01")
-                    .encode()
+                    .queryParam("serviceKey", publicKey)
                     .build()
                     .toUri();
 
+
+
+
             RestTemplate restTemplate = new RestTemplate();
             log.warn("thread "+ threadCount +" --> "+uri.toString());
+
             PublicApiV2Form result = new PublicApiV2Form();
 
             synchronized (this) {
