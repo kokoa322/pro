@@ -11,13 +11,21 @@ import com.baesullin.pro.store.domain.Store;
 import com.baesullin.pro.storeApiUpdate.StoreApiUpdate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.transaction.Transactional;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,6 +65,12 @@ public class ApiUpdateThread extends Thread {
      * int pageNo 데이터 가져올 페이지
      */
 
+    private List<HttpMessageConverter<?>> getMessageConverters() {
+        List<HttpMessageConverter<?>> converters = new ArrayList<>();
+        converters.add(new Jaxb2RootElementHttpMessageConverter());
+        // 다른 HttpMessageConverter도 필요한 경우 여기에 추가할 수 있습니다.
+        return converters;
+    }
 
     public void processApi() {
         HttpHeaders headers = setHttpHeaders();
@@ -67,39 +81,38 @@ public class ApiUpdateThread extends Thread {
 
             headers = setHttpHeaders();
             log.info("thread "+ threadCount +" --> "+"{}, {}, print", siDoNm, cggNm);
-
-            log.info("publicKey --> "+"{}", publicKey);
             // URI 생성
             String publicV2Uri = "http://apis.data.go.kr/B554287/DisabledPersonConvenientFacility/getDisConvFaclList";
 
-
-            URI uri = UriComponentsBuilder
-                    .fromUriString(publicV2Uri)
+            UriComponents uri = UriComponentsBuilder
+                    .fromHttpUrl(publicV2Uri)
                     .queryParam("numOfRows", "1000")
                     .queryParam("pageNo", String.valueOf(pageNo))
                     .queryParam("siDoNm", siDoNm)
                     .queryParam("cggNm", cggNm)
                     .queryParam("faclTyCd", "UC0B01")
                     .queryParam("serviceKey", publicKey)
-                    .build()
-                    .toUri();
+                    .build();
 
+            log.warn("thread "+ threadCount +" --> "+uri.toUriString());
 
-
-
-            RestTemplate restTemplate = new RestTemplate();
-            log.warn("thread "+ threadCount +" --> "+uri.toString());
+            RestTemplate restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory()));
 
             PublicApiV2Form result = new PublicApiV2Form();
 
+            HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+            factory.setConnectTimeout(60000); // 연결 타임아웃 5초로 설정
+            factory.setReadTimeout(60000); // 읽기 타임아웃 5초로 설정
+            restTemplate.setRequestFactory(factory);
+            restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+            restTemplate.setMessageConverters(getMessageConverters());
+
             synchronized (this) {
                 ResponseEntity<PublicApiV2Form> resultRe = restTemplate.exchange(
-                        uri, HttpMethod.GET, new HttpEntity<>(headers), PublicApiV2Form.class
+                        uri.toUriString(), HttpMethod.GET, new HttpEntity<>(headers), PublicApiV2Form.class
                 );
                 result = resultRe.getBody();
             }
-
-
 
             if (result == null){      // 결과가 없으면 false 리턴
                 log.info("result --> NULL");
@@ -107,7 +120,7 @@ public class ApiUpdateThread extends Thread {
             }
 
 
-            List<List<Store>> storeListList = processForm(result);
+           List<List<Store>> storeListList = processForm(result);
             // totalSize, 현 페이지를 통해 다음 페이지가 있는지 확인하고 T/F 리턴
 
 
@@ -116,7 +129,9 @@ public class ApiUpdateThread extends Thread {
                 continue;
             }
 
-            for(List<Store> storeList: storeListList){
+
+
+          for(List<Store> storeList: storeListList) {
                 for(Store store: storeList){
                     StoreApiUpdate storeApiUpdate = new StoreApiUpdate(store);
                     synchronized (this) {
@@ -124,6 +139,7 @@ public class ApiUpdateThread extends Thread {
                     }
                 }
             }
+
 
             log.info("thread "+ threadCount +" : store SIZE --> "+ storeApiUpdateList.size());
         }
@@ -148,25 +164,25 @@ public class ApiUpdateThread extends Thread {
             storeListList.add(storeList);
         }
         // 검증 완료된 store들을 저장
-
-
         return storeListList;
     }
+
 
     /**
      * @return 헤더 세팅 - V2에서는 공통으로 XML 사용
      */
     private HttpHeaders setHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
+        headers.add("text/xml-Charset", "UTF-8");
         headers.setContentType(MediaType.APPLICATION_XML);
         headers.setAccept(List.of(MediaType.APPLICATION_XML));
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
         return headers;
     }
-
     /**
      * @param servList V2의 결과 Row
      */
-    private List<Store> mapApiToStoreWithPaging(PublicApiV2Form.ServList servList) {
+   private List<Store> mapApiToStoreWithPaging(PublicApiV2Form.ServList servList) {
         // 태그 String을 분리 & 매핑해 리스트에 저장
         List<String> barrierTagList = tagStrToList(servList.getWfcltId());
 
@@ -184,10 +200,12 @@ public class ApiUpdateThread extends Thread {
     }
 
 
+
     /**
      * @param servList       대상 Row
      * @param barrierTagList 배리어 태그 리스트
      */
+
     @Transactional
     public List<Store> searchWithAddress(PublicApiV2Form.ServList servList, List<String> barrierTagList) {
 
@@ -278,10 +296,13 @@ public class ApiUpdateThread extends Thread {
         return resultRe.getBody();
     }
 
+
+
     /**
      * @param sisulNum 시설 고유 번호
      * @return API 결과로 나온 문자열을 리스트로 분리
      */
+
     public List<String> tagStrToList(String sisulNum) {
         HttpHeaders headers = setHttpHeaders();
         String publicV2CategoryUri = "http://apis.data.go.kr/B554287/DisabledPersonConvenientFacility/getFacInfoOpenApiJpEvalInfoList";
@@ -306,6 +327,7 @@ public class ApiUpdateThread extends Thread {
      * @param result API 결과로 나온 리스트
      * @return DB에 맞게 리스트를 변환
      */
+
     private List<String> mapTags(PublicApiCategoryForm result) {
         List<String> barrierTagResult = new ArrayList<>(); // 태그 결과들을 담을 리스트
         if (result == null || result.getServList() == null) {
@@ -319,10 +341,12 @@ public class ApiUpdateThread extends Thread {
         return barrierTagResult;
     }
 
+
     /**
      * @param serv API 결과
      * @return Enum을 통해 String 가공해서 변환
      */
+
     private List<String> getStrings(PublicApiCategoryForm.ServList serv) {
         if (serv != null && serv.validation()) { // 결과가 존재할 떄
             String[] splitInput = serv.getEvalInfo().split(",");
@@ -333,6 +357,7 @@ public class ApiUpdateThread extends Thread {
         }
         return null;
     }
+
 
 
 

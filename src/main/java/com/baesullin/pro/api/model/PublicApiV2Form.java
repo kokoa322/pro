@@ -4,17 +4,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
 
 @NoArgsConstructor
 @Getter
 @Setter
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "facInfoList")
 public class PublicApiV2Form {
     private int totalCount;
     private int resultCode;
     private String resultMessage;
+
     private ServList[] servList;
+
 
     @NoArgsConstructor
     @Getter
@@ -39,5 +43,4 @@ public class PublicApiV2Form {
                     && this.wfcltId != null && this.faclNm != null;
         }
     }
-
 }
