@@ -16,7 +16,6 @@ public class PublicApiV2Form {
     private int totalCount;
     private int resultCode;
     private String resultMessage;
-
     private ServList[] servList;
 
 

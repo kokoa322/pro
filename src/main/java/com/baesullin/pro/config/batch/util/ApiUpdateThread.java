@@ -22,6 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.transaction.Transactional;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,6 +75,7 @@ public class ApiUpdateThread extends Thread {
 
     public void processApi() {
         HttpHeaders headers = setHttpHeaders();
+
         // 헤더 세팅
         for(List<String> csv: csvList){
             String siDoNm = csv.get(0);
@@ -97,22 +99,23 @@ public class ApiUpdateThread extends Thread {
             log.warn("thread "+ threadCount +" --> "+uri.toUriString());
 
             RestTemplate restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory()));
-
-            PublicApiV2Form result = new PublicApiV2Form();
+            restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8)); // 추가한 부분
+            restTemplate.setMessageConverters(getMessageConverters());
 
             HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
             factory.setConnectTimeout(60000); // 연결 타임아웃 5초로 설정
             factory.setReadTimeout(60000); // 읽기 타임아웃 5초로 설정
             restTemplate.setRequestFactory(factory);
-            restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-            restTemplate.setMessageConverters(getMessageConverters());
 
+
+            PublicApiV2Form result = new PublicApiV2Form();
             synchronized (this) {
                 ResponseEntity<PublicApiV2Form> resultRe = restTemplate.exchange(
                         uri.toUriString(), HttpMethod.GET, new HttpEntity<>(headers), PublicApiV2Form.class
                 );
                 result = resultRe.getBody();
             }
+
 
             if (result == null){      // 결과가 없으면 false 리턴
                 log.info("result --> NULL");
@@ -139,6 +142,8 @@ public class ApiUpdateThread extends Thread {
                     }
                 }
             }
+
+
 
 
             log.info("thread "+ threadCount +" : store SIZE --> "+ storeApiUpdateList.size());
@@ -173,10 +178,9 @@ public class ApiUpdateThread extends Thread {
      */
     private HttpHeaders setHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("text/xml-Charset", "UTF-8");
         headers.setContentType(MediaType.APPLICATION_XML);
         headers.setAccept(List.of(MediaType.APPLICATION_XML));
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+
         return headers;
     }
     /**
@@ -272,11 +276,17 @@ public class ApiUpdateThread extends Thread {
 
 
     private LocationKeywordSearchForm getCategoryByCode(String lat, String lng, String storeName, String cateCode, int page) {
+
+        log.info("Authorization --> {} ", kakaoApiKey);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", kakaoApiKey);
-        URI uri = UriComponentsBuilder
+
+
+
+        UriComponents uri = UriComponentsBuilder
                 .fromUriString("https://dapi.kakao.com/v2/local/search/keyword.json")
                 .queryParam("query", storeName)
                 .queryParam("x", lng)//위도, 경도 지정
@@ -285,13 +295,16 @@ public class ApiUpdateThread extends Thread {
                 .queryParam("radius", 20)
                 .queryParam("page", page)
                 .queryParam("size", 15)
-                .encode()
-                .build()
-                .toUri();
+                .build();
 
+        log.warn("thread "+ threadCount +" --> "+uri.toUriString());
         RestTemplate restTemplate = new RestTemplate();
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        factory.setConnectTimeout(60000); // 연결 타임아웃 1분으로 설정
+        factory.setReadTimeout(60000); // 읽기 타임아웃 1분으로 설정
+        restTemplate.setRequestFactory(factory);
         ResponseEntity<LocationKeywordSearchForm> resultRe = restTemplate.exchange(
-                uri, HttpMethod.GET, new HttpEntity<>(headers), LocationKeywordSearchForm.class
+                uri.toUriString(), HttpMethod.GET, new HttpEntity<>(headers), LocationKeywordSearchForm.class
         );
         return resultRe.getBody();
     }
@@ -306,18 +319,24 @@ public class ApiUpdateThread extends Thread {
     public List<String> tagStrToList(String sisulNum) {
         HttpHeaders headers = setHttpHeaders();
         String publicV2CategoryUri = "http://apis.data.go.kr/B554287/DisabledPersonConvenientFacility/getFacInfoOpenApiJpEvalInfoList";
-        URI uri = UriComponentsBuilder
+
+        UriComponents uri = UriComponentsBuilder
                 .fromUriString(publicV2CategoryUri)
                 .queryParam("serviceKey", publicKey)
                 .queryParam("wfcltId", sisulNum)
-                .build()
-                .encode()
-                .toUri();
+                .build();
 
-        RestTemplate restTemplate = new RestTemplate();
-        log.warn("thread "+ threadCount +" --> "+uri.toString());
+        RestTemplate restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory()));
+        restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8)); // 추가한 부분
+        restTemplate.setMessageConverters(getMessageConverters());
+
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        factory.setConnectTimeout(60000); // 연결 타임아웃 1분으로 설정
+        factory.setReadTimeout(60000); // 읽기 타임아웃 1분으로 설정
+        restTemplate.setRequestFactory(factory);
+        log.warn("thread "+ threadCount +" --> "+uri.toUriString());
         ResponseEntity<PublicApiCategoryForm> resultRe = restTemplate.exchange(
-                uri, HttpMethod.GET, new HttpEntity<>(headers), PublicApiCategoryForm.class
+                uri.toUriString(), HttpMethod.GET, new HttpEntity<>(headers), PublicApiCategoryForm.class
         );
         PublicApiCategoryForm result = resultRe.getBody();
         return mapTags(result);
