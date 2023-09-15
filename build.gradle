@@ -67,10 +67,7 @@ dependencies {
 	implementation 'com.google.code.gson:gson:2.9.0'
 	//JSON 변환을 위한 Jackson Library
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
-	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.3' // 원하는 버전으로 변경 가능
-
-
-
+	//implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.3' // 원하는 버전으로 변경 가능
 	//implementation 'javax.xml.bind:jaxb-api:2.3.1'
 
 

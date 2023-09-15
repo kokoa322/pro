@@ -19,8 +19,6 @@ public class PublicApiV2Form {
     private String resultMessage;
     private List<ServList> servList;
 
-
-
     @Getter
     @Setter
     @NoArgsConstructor
