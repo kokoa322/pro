@@ -132,11 +132,7 @@ public class BatchConfiguration {
                 e.printStackTrace();
             }
 
-
-
             log.info("store SIZE --> "+ storeApiUpdateList.size());
-            System.out.println("for(List<List<String>> csvListAvg: csvListList)");
-
 
             HttpHeaders  headers = new HttpHeaders();
             RestTemplate rest    = new RestTemplate();

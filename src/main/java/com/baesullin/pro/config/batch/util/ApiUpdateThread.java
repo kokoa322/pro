@@ -9,33 +9,29 @@ import com.baesullin.pro.common.DataClarification;
 import com.baesullin.pro.store.domain.Category;
 import com.baesullin.pro.store.domain.Store;
 import com.baesullin.pro.storeApiUpdate.StoreApiUpdate;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.*;
 
 import javax.transaction.Transactional;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 public class ApiUpdateThread extends Thread {
-
 
     private String               kakaoApiKey;
     private List<List<String>>   csvList;
@@ -56,9 +52,42 @@ public class ApiUpdateThread extends Thread {
     }
 
     @Override
-    public void run(){
-        processApi();
+    public void run(){processApi();}
 
+    private RestTemplate getRestTemplate() {
+        RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+        restTemplate.setUriTemplateHandler(new NoEncodingUriTemplateHandler());
+        XmlMapper xmlMapper = new XmlMapper();
+        MappingJackson2XmlHttpMessageConverter converter = new MappingJackson2XmlHttpMessageConverter(xmlMapper);
+        converter.setDefaultCharset(StandardCharsets.UTF_8);
+        restTemplate.getMessageConverters().removeIf(mc -> mc instanceof MappingJackson2HttpMessageConverter);
+        restTemplate.getMessageConverters().add(converter);
+
+        /*
+        RestTemplate restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory()));
+        restTemplate.getMessageConverters().add(new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        restTemplate.getMessageConverters().add(new Jaxb2RootElementHttpMessageConverter());
+        // Jackson XML ObjectMapper 설정
+        XmlMapper xmlMapper = new XmlMapper();
+        xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        xmlMapper.enable(ToXmlGenerator.Feature.WRITE_XML_DECLARATION);
+
+        // XML 응답 처리를 위한 메시지 컨버터 설정
+        MappingJackson2XmlHttpMessageConverter converter = new MappingJackson2XmlHttpMessageConverter(xmlMapper);
+        converter.setDefaultCharset(StandardCharsets.UTF_8);
+
+        // 기존의 기본 메시지 컨버터 제거
+        restTemplate.getMessageConverters().removeIf(mc -> mc instanceof MappingJackson2HttpMessageConverter);
+
+        // Jackson XML 메시지 컨버터 등록
+        restTemplate.getMessageConverters().add(converter);
+        */
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        factory.setConnectTimeout(60000); // 연결 타임아웃 1분으로 설정
+        factory.setReadTimeout(60000); // 읽기 타임아웃 1분으로 설정
+        restTemplate.setRequestFactory(factory);
+
+        return restTemplate;
     }
     public List<StoreApiUpdate> getList(){
         return storeApiUpdateList;
@@ -69,10 +98,9 @@ public class ApiUpdateThread extends Thread {
      * int pageNo 데이터 가져올 페이지
      */
 
-
-
+    @Autowired
     public void processApi() {
-        HttpHeaders headers = setHttpHeaders();
+        HttpHeaders headers;
 
         // 헤더 세팅
         for(List<String> csv: csvList){
@@ -80,16 +108,15 @@ public class ApiUpdateThread extends Thread {
             String cggNm  = csv.get(1);
 
             headers = setHttpHeaders();
-            log.info("thread "+ threadCount +" --> "+"{}, {}, print", siDoNm, cggNm);
+            HttpEntity<?> entity = new HttpEntity<>(headers);
+            log.info("thread "+ threadCount +" --> "+"{} {}", siDoNm, cggNm);
             // URI 생성
             String publicV2Uri = "http://apis.data.go.kr/B554287/DisabledPersonConvenientFacility/getDisConvFaclList";
 
             UriComponents uri = UriComponentsBuilder
                     .fromHttpUrl(publicV2Uri)
-                    .queryParam("siDoNm", UriUtils.encodeQueryParam(siDoNm, StandardCharsets.UTF_8))
-                    .queryParam("cggNm", UriUtils.encodeQueryParam(cggNm, StandardCharsets.UTF_8))
-                    //.queryParam("siDoNm", siDoNm)
-                    //.queryParam("cggNm", cggNm)
+                    .queryParam("siDoNm", siDoNm)
+                    .queryParam("cggNm", cggNm)
                     .queryParam("numOfRows", "1000")
                     .queryParam("pageNo", String.valueOf(pageNo))
                     .queryParam("faclTyCd", "UC0B01")
@@ -98,25 +125,21 @@ public class ApiUpdateThread extends Thread {
 
             log.warn("thread "+ threadCount +" --> "+uri.toUriString());
 
-            //RestTemplate restTemplate = new RestTemplate();
-            RestTemplate restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(new HttpComponentsClientHttpRequestFactory()));
-            restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-            //restTemplate.getMessageConverters().add(new MappingJackson2XmlHttpMessageConverter()); // Jackson XML 메시지 컨버터 추가
-            //restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter()); // Jackson XML 메시지 컨버터 추가
-
-            HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-            factory.setConnectTimeout(60000); // 연결 타임아웃 5초로 설정
-            factory.setReadTimeout(60000); // 읽기 타임아웃 5초로 설정
-            restTemplate.setRequestFactory(factory);
-
-
+            RestTemplate restTemplate = getRestTemplate();
             PublicApiV2Form result = new PublicApiV2Form();
+
             synchronized (this) {
                 ResponseEntity<PublicApiV2Form> resultRe = restTemplate.exchange(
-                        uri.toUriString(), HttpMethod.GET, new HttpEntity<>(headers), PublicApiV2Form.class
+                        uri.toUriString(), HttpMethod.GET, entity, PublicApiV2Form.class
                 );
 
-                result = resultRe.getBody();
+                System.out.println(resultRe.getBody().getTotalCount());
+                if (resultRe.getStatusCode().is2xxSuccessful()) {
+                    result = resultRe.getBody();
+                } else {
+                    System.err.println("Error response: " + resultRe.getStatusCode());
+                }
+
             }
 
             if (result == null){      // 결과 가 없으면 false 리턴
@@ -153,6 +176,8 @@ public class ApiUpdateThread extends Thread {
 
     }
 
+
+
     public List<List<Store>> processForm(PublicApiV2Form formResult) {
         if (formResult == null || formResult.getServList() == null) return null;
         // servList + Barrier Free Tag  + category
@@ -179,10 +204,9 @@ public class ApiUpdateThread extends Thread {
      */
     private HttpHeaders setHttpHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML);
-        //Charset utf_8 = StandardCharsets.UTF_8;
-        //MediaType mediaType = new MediaType("text", "xml", utf_8);
-        //headers.setContentType(mediaType);
+        //headers.setContentType(MediaType.APPLICATION_XML);
+        //headers.setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
+        headers.set("Accept", "application/xml;charset=UTF-8");
         headers.setAccept(List.of(MediaType.APPLICATION_XML));
         return headers;
     }
@@ -337,6 +361,7 @@ public class ApiUpdateThread extends Thread {
         factory.setConnectTimeout(60000); // 연결 타임아웃 1분으로 설정
         factory.setReadTimeout(60000); // 읽기 타임아웃 1분으로 설정
         restTemplate.setRequestFactory(factory);
+
         log.warn("thread "+ threadCount +" --> "+uri.toUriString());
         ResponseEntity<PublicApiCategoryForm> resultRe = restTemplate.exchange(
                 uri.toUriString(), HttpMethod.GET, new HttpEntity<>(headers), PublicApiCategoryForm.class
