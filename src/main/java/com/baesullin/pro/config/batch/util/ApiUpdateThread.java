@@ -12,6 +12,7 @@ import com.baesullin.pro.storeApiUpdate.StoreApiUpdate;
 //import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 //import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
@@ -51,9 +52,18 @@ public class ApiUpdateThread extends Thread {
 
     }
 
+
     @Override
     public void run(){processApi();}
 
+
+    public void sleeper() {
+        try{
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     private RestTemplate getRestTemplate() {
         RestTemplate restTemplate = new RestTemplate();
 
@@ -62,8 +72,8 @@ public class ApiUpdateThread extends Thread {
         restTemplate.setUriTemplateHandler(uriBuilderFactory);
 
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-        factory.setConnectTimeout(60000); // 연결 타임아웃 1분으로 설정
-        factory.setReadTimeout(60000); // 읽기 타임아웃 1분으로 설정
+        factory.setConnectTimeout(600000); // 연결 타임아웃 10분으로 설정
+        factory.setReadTimeout(600000); // 읽기 타임아웃 10분으로 설정
         restTemplate.setRequestFactory(factory);
 
         return restTemplate;
@@ -107,23 +117,18 @@ public class ApiUpdateThread extends Thread {
             RestTemplate restTemplate = getRestTemplate();
             PublicApiV2Form result = new PublicApiV2Form();
 
-            synchronized (this) {
-                ResponseEntity<PublicApiV2Form> resultRe = restTemplate.exchange(
-                        uri.toUriString(), HttpMethod.GET, entity, PublicApiV2Form.class
-                );
+                synchronized (this) {
+                    ResponseEntity<PublicApiV2Form> resultRe = restTemplate.exchange(
+                            uri.toUriString(), HttpMethod.GET, entity, PublicApiV2Form.class
+                    );
 
-                log.info("resultRe.getBody().getTotalCount() --> {}", resultRe.getBody().getTotalCount());
-                log.info("resultRe.getBody().getResultCode() --> {}", resultRe.getBody().getResultCode());
-                log.info("resultRe.getBody().getResultMessage() --> {}", resultRe.getBody().getResultMessage());
-                log.info("resultRe.getBody().getServList().get(0).getFaclNm() --> {}", resultRe.getBody().getServList().get(0).getFaclNm());
+                    if (resultRe.getStatusCode().is2xxSuccessful()) {
+                        result = resultRe.getBody();
+                    } else {
+                        System.err.println("Error response: " + resultRe.getStatusCode());
+                    }
 
-                if (resultRe.getStatusCode().is2xxSuccessful()) {
-                    result = resultRe.getBody();
-                } else {
-                    System.err.println("Error response: " + resultRe.getStatusCode());
                 }
-
-            }
 
             if (result == null){      // 결과 가 없으면 false 리턴
                 log.info("result --> NULL");
@@ -162,7 +167,6 @@ public class ApiUpdateThread extends Thread {
 
 
     public List<List<Store>> processForm(PublicApiV2Form formResult) {
-        log.info("processForm -->");
         if (formResult == null || formResult.getServList() == null) return null;
         // servList + Barrier Free Tag  + category
 
@@ -198,7 +202,6 @@ public class ApiUpdateThread extends Thread {
      * @param servList V2의 결과 Row
      */
    private List<Store> mapApiToStoreWithPaging(PublicApiV2Form.ServList servList) {
-       log.info("mapApiToStoreWithPaging -->");
         // 태그 String을 분리 & 매핑해 리스트에 저장
         List<String> barrierTagList = tagStrToList(servList.getWfcltId());
 
@@ -224,7 +227,6 @@ public class ApiUpdateThread extends Thread {
 
     @Transactional
     public List<Store> searchWithAddress(PublicApiV2Form.ServList servList, List<String> barrierTagList) {
-        log.info("searchWithAddress -->");
 
         List<LocationInfoDto.LocationResponse> locationResponseMapList = convertGeoAndAddressToKeyword(servList.getFaclLat(), servList.getFaclLng(), DataClarification.clarifyString(servList.getLcMnad()));
         List<Store> storeList = new ArrayList<>();
@@ -242,7 +244,6 @@ public class ApiUpdateThread extends Thread {
     }
 
     public List<LocationInfoDto.LocationResponse> convertGeoAndAddressToKeyword(String lat, String lng, String address) {
-        log.info("convertGeoAndAddressToKeyword -->");
         List<LocationInfoDto.LocationResponse> resultList = new ArrayList<>();
         getStoreResults(lat, lng, address, "FD6", resultList);
         getStoreResults(lat, lng, address, "CE7", resultList);
@@ -250,7 +251,6 @@ public class ApiUpdateThread extends Thread {
     }
 
     private void getStoreResults(String lat, String lng, String address, String type, List<LocationInfoDto.LocationResponse> resultList) {
-        log.info("getStoreResults -->");
         LocationKeywordSearchForm locationKeywordSearchForm;
         int page = 1;
         do {
@@ -280,7 +280,6 @@ public class ApiUpdateThread extends Thread {
     }
 
     private String categoryFilter(String category) {
-        log.info("categoryFilter -->");
         if (category == null) {
             return Category.ETC.getDesc();
         } else if (category.contains(">")) {
@@ -292,15 +291,10 @@ public class ApiUpdateThread extends Thread {
 
 
     private LocationKeywordSearchForm getCategoryByCode(String lat, String lng, String storeName, String cateCode, int page) {
-        log.info("getCategoryByCode -->");
-        log.info("Authorization --> {} ", kakaoApiKey);
-
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", kakaoApiKey);
-
-
+        headers.set("Authorization", "KakaoAK "+kakaoApiKey);
 
         UriComponents uri = UriComponentsBuilder
                 .fromUriString("https://dapi.kakao.com/v2/local/search/keyword.json")
@@ -313,16 +307,30 @@ public class ApiUpdateThread extends Thread {
                 .queryParam("size", 15)
                 .build();
 
-        log.warn("thread "+ threadCount +" --> "+uri.toUriString());
-        RestTemplate restTemplate = new RestTemplate();
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-        factory.setConnectTimeout(60000); // 연결 타임아웃 1분으로 설정
-        factory.setReadTimeout(60000); // 읽기 타임아웃 1분으로 설정
-        restTemplate.setRequestFactory(factory);
-        ResponseEntity<LocationKeywordSearchForm> resultRe = restTemplate.exchange(
-                uri.toUriString(), HttpMethod.GET, new HttpEntity<>(headers), LocationKeywordSearchForm.class
-        );
-        return resultRe.getBody();
+
+        RestTemplate restTemplate = getRestTemplate();
+
+        for(int i=0; i<100; i++) {
+            try {
+                ResponseEntity<LocationKeywordSearchForm> resultRe = restTemplate.exchange(
+                        uri.toUriString(), HttpMethod.GET, new HttpEntity<>(headers), LocationKeywordSearchForm.class
+                );
+
+                if (resultRe.getStatusCode().is2xxSuccessful()) {
+                    return resultRe.getBody();
+                } else {
+                    System.err.println("Error response: " + resultRe.getStatusCode());
+                    sleeper();
+                    continue;
+                }
+            } catch(Exception e) {
+                log.warn("thread "+ threadCount +" getCategoryByCode Catch Request --> "+uri.toUriString());
+                sleeper();
+                continue;
+            }
+        }
+
+        return null;
     }
 
 
@@ -333,7 +341,6 @@ public class ApiUpdateThread extends Thread {
      */
 
     public List<String> tagStrToList(String sisulNum) {
-        log.info("tagStrToList -->");
         HttpHeaders headers = setHttpHeaders();
         String publicV2CategoryUri = "http://apis.data.go.kr/B554287/DisabledPersonConvenientFacility/getFacInfoOpenApiJpEvalInfoList";
 
@@ -345,12 +352,29 @@ public class ApiUpdateThread extends Thread {
 
        RestTemplate restTemplate = getRestTemplate();
 
-        log.warn("thread "+ threadCount +" --> "+uri.toUriString());
-        ResponseEntity<PublicApiCategoryForm> resultRe = restTemplate.exchange(
-                uri.toUriString(), HttpMethod.GET, new HttpEntity<>(headers), PublicApiCategoryForm.class
-        );
-        PublicApiCategoryForm result = resultRe.getBody();
-        return mapTags(result);
+
+
+        for(int i=0; i<100; i++) {
+            try{
+                ResponseEntity<PublicApiCategoryForm> resultRe = restTemplate.exchange(
+                        uri.toUriString(), HttpMethod.GET, new HttpEntity<>(headers), PublicApiCategoryForm.class
+                );
+
+                if (resultRe.getStatusCode().is2xxSuccessful()) {
+                    PublicApiCategoryForm result = resultRe.getBody();
+                    return mapTags(result);
+                } else {
+                    System.err.println("Error response: " + resultRe.getStatusCode());
+                    sleeper();
+                    continue;
+                }
+            } catch (Exception e) {
+                log.warn("thread "+ threadCount +" tagStrToList Catch Request --> "+uri.toUriString());
+                sleeper();
+                continue;
+            }
+        }
+        return null;
     }
 
     /**
