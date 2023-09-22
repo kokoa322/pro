@@ -305,13 +305,12 @@ public class ApiUpdateThread extends Thread {
                 .queryParam("radius", 20)
                 .queryParam("page", page)
                 .queryParam("size", 15)
+                .encode()
                 .build();
 
 
         RestTemplate restTemplate = getRestTemplate();
 
-        for(int i=0; i<100; i++) {
-            try {
                 ResponseEntity<LocationKeywordSearchForm> resultRe = restTemplate.exchange(
                         uri.toUriString(), HttpMethod.GET, new HttpEntity<>(headers), LocationKeywordSearchForm.class
                 );
@@ -321,14 +320,9 @@ public class ApiUpdateThread extends Thread {
                 } else {
                     System.err.println("Error response: " + resultRe.getStatusCode());
                     sleeper();
-                    continue;
                 }
-            } catch(Exception e) {
                 log.warn("thread "+ threadCount +" getCategoryByCode Catch Request --> "+uri.toUriString());
                 sleeper();
-                continue;
-            }
-        }
 
         return null;
     }

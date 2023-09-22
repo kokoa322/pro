@@ -33,6 +33,7 @@ import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilde
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -73,15 +74,15 @@ public class BatchConfiguration {
 
     private static int STORE_SIZE = 0; //쓰기 단위인 청크사이즈
 
-
+    private boolean batchEnabled = false; // 조건 변수
     @Bean
     public Job JpaPageJob1_storeApiUpdate() throws JsonProcessingException{
-        return jobBuilderFactory.get("JpaPageJob1_storeApiUpdate")
-                .start(JpaPageJob1_step1()) // store_api_update API 응답데이터 받기
-                .start(jpaPageJob1_step2())  // 추가된 업장이 있으면 store 테이블에 INSERT
+            return jobBuilderFactory.get("JpaPageJob1_storeApiUpdate")
+                    .start(JpaPageJob1_step1()) // store_api_update API 응답데이터 받기
+                    .start(jpaPageJob1_step2())  // 추가된 업장이 있으면 store 테이블에 INSERT
 //                .start(JpaPageJob4_step1())  // 사라진 업장이 있으면 store 테이블에 DELETE
-                .next(JpaPageJob1_step4()) // 수정된 업장이 있다면 store 테이블에 UPDATE
-                .build();
+                    .next(JpaPageJob1_step4()) // 수정된 업장이 있다면 store 테이블에 UPDATE
+                    .build();
     }
 
 
@@ -126,7 +127,6 @@ public class BatchConfiguration {
             try {
                 for (ApiUpdateThread apiUpdateThread: apiUpdateThreadList){
                     apiUpdateThread.join();
-
                 }
             } catch(Exception e){
                 e.printStackTrace();
@@ -134,14 +134,15 @@ public class BatchConfiguration {
 
             log.info("store SIZE --> "+ storeApiUpdateList.size());
 
-            HttpHeaders  headers = new HttpHeaders();
-            RestTemplate rest    = new RestTemplate();
-            String body          = "";
+            HttpHeaders  headers        = new HttpHeaders();
+            RestTemplate restTemplate   = new RestTemplate();
+            String body                 = "";
 
             HttpEntity<String>      requestEntity  = new HttpEntity<String>(body, headers);
-            ResponseEntity<String>  responseEntity = rest.exchange("http://openapi.seoul.go.kr:8088/5274616b45736f7933376e6c525658/json/touristFoodInfo/1/1000/", HttpMethod.GET, requestEntity, String.class);
+            ResponseEntity<String>  responseEntity = restTemplate.exchange("http://openapi.seoul.go.kr:8088/5274616b45736f7933376e6c525658/json/touristFoodInfo/1/1000/", HttpMethod.GET, requestEntity, String.class);
             HttpStatus              httpStatus     = responseEntity.getStatusCode();
             String                  response       = responseEntity.getBody();
+
 
 
             JsonDTO jsonDTO = new Gson().fromJson(response, JsonDTO.class);  //conversion using Gson Library.
