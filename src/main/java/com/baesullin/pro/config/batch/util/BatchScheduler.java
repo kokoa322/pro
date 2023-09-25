@@ -28,7 +28,6 @@ public class BatchScheduler {
 
     private final BatchConfiguration batchConfiguration;
     private final JobLauncher jobLauncher;
-
     private boolean scheduledEnable = false;
 
     // 주기적으로 실행될 스케줄링된 작업을 정의합니다.
@@ -64,7 +63,6 @@ public class BatchScheduler {
             scheduledEnable = true;
             return;
         }
-
-
     }
 }
+

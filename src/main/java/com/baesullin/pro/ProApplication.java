@@ -16,10 +16,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching
 @EnableScheduling
 @EnableSchedulerLock(defaultLockAtMostFor = "PT30S")
-//@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @EnableConfigurationProperties(AppProperties.class)
-//@PropertySources({@PropertySource("classpath:application-key.properties")})
 @SpringBootApplication
+//@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+//@PropertySources({@PropertySource("classpath:application-key.properties")})
 public class ProApplication {
 
 	public static void main(String[] args) {

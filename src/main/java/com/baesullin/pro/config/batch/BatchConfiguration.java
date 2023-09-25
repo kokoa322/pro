@@ -74,14 +74,14 @@ public class BatchConfiguration {
 
     private static int STORE_SIZE = 0; //쓰기 단위인 청크사이즈
 
-    private boolean batchEnabled = false; // 조건 변수
+
     @Bean
     public Job JpaPageJob1_storeApiUpdate() throws JsonProcessingException{
             return jobBuilderFactory.get("JpaPageJob1_storeApiUpdate")
                     .start(JpaPageJob1_step1()) // store_api_update API 응답데이터 받기
-                    .start(jpaPageJob1_step2())  // 추가된 업장이 있으면 store 테이블에 INSERT
-//                .start(JpaPageJob4_step1())  // 사라진 업장이 있으면 store 테이블에 DELETE
-                    .next(JpaPageJob1_step4()) // 수정된 업장이 있다면 store 테이블에 UPDATE
+                    //.next(jpaPageJob1_step2())  // 추가된 업장이 있으면 store 테이블에 INSERT
+                    //.start(JpaPageJob4_step1())  // 사라진 업장이 있으면 store 테이블에 DELETE
+                    //.next(JpaPageJob1_step4()) // 수정된 업장이 있다면 store 테이블에 UPDATE
                     .build();
     }
 
@@ -117,12 +117,22 @@ public class BatchConfiguration {
             System.out.println("Thred 갯수 -- >: "+ csvListList.size());
             List<ApiUpdateThread> apiUpdateThreadList = new ArrayList<>();
             int index = 1;
+
+
+            csvListList.forEach((csvListAvg) -> {
+                ApiUpdateThread apiUpdateThread = new ApiUpdateThread(csvListAvg, storeApiUpdateList, 1, publicV2Key, kokoaApiKey, index);
+                apiUpdateThread.start();
+                apiUpdateThreadList.add(apiUpdateThread);
+            });
+
+            /*
             for(List<List<String>> csvListAvg: csvListList){
                 ApiUpdateThread apiUpdateThread = new ApiUpdateThread(csvListAvg, storeApiUpdateList, 1, publicV2Key, kokoaApiKey, index);
                 apiUpdateThread.start();
                 apiUpdateThreadList.add(apiUpdateThread);
                 index ++;
             }
+             */
 
             try {
                 for (ApiUpdateThread apiUpdateThread: apiUpdateThreadList){
@@ -134,6 +144,7 @@ public class BatchConfiguration {
 
             log.info("store SIZE --> "+ storeApiUpdateList.size());
 
+            /*
             HttpHeaders  headers        = new HttpHeaders();
             RestTemplate restTemplate   = new RestTemplate();
             String body                 = "";
@@ -150,10 +161,11 @@ public class BatchConfiguration {
 
             storeApiUpdateList.addAll(saveValidStores(jsonDTO.getTouristFoodInfo().getRow()));
 
-
             log.info("store SIZE --> "+ storeApiUpdateList.size());
 
             STORE_SIZE = storeApiUpdateList.size();
+
+             */
 
             sec = (System.currentTimeMillis() - sTime) / 1000.0;
             System.out.printf("소요시간 --- (%.2f초)%n", sec);
@@ -170,24 +182,24 @@ public class BatchConfiguration {
 
             };
         }
-        @Bean
+
         public ItemWriter<StoreApiUpdate> jpaPageJob1_dbItemWriter(){
 
             log.info("********** This is jpaPageJob1_dbItemWriter");
 
             return list -> {
                 for(StoreApiUpdate storeApiUpdate: list){
-                    if(!storeApiUpdateRepository.existsById(storeApiUpdate.getId())){
-                        storeImageService.saveImage(storeApiUpdate.getId());
-                    }
+                    System.out.println(storeApiUpdate.getId());
+                   // if(!storeApiUpdateRepository.existsById(storeApiUpdate.getId())){
+                     //   storeImageService.saveImage(storeApiUpdate.getId());
+                       // storeApiUpdateRepository.save(storeApiUpdate);
+                   // }
                 }
-                storeApiUpdateRepository.saveAll(list);
+             //storeApiUpdateRepository.saveAll(list);
             };
-
         }
 
-
-
+/*
     @Bean
     public Step jpaPageJob1_step2() throws JsonProcessingException {
         return stepBuilderFactory.get("jpaPageJob1_step2")
@@ -200,8 +212,8 @@ public class BatchConfiguration {
 
     }
 
-    @Bean
-    public JpaPagingItemReader<StoreApiUpdate> jpaPageJob1_step2_ItemReader() throws JsonProcessingException {
+        @Bean
+        public JpaPagingItemReader<StoreApiUpdate> jpaPageJob1_step2_ItemReader() throws JsonProcessingException {
 
         log.info("********** This is jpaPageJob1_step2_ItemReader");
         return new JpaPagingItemReaderBuilder<StoreApiUpdate>()
@@ -213,7 +225,7 @@ public class BatchConfiguration {
     }
 
 
-    private ItemProcessor<StoreApiUpdate, Store> jpaPageJob1_step2_Processor() {
+        private ItemProcessor<StoreApiUpdate, Store> jpaPageJob1_step2_Processor() {
         log.info("********** This is jpaPageJob1_step2_Processor");
         return storeApiUpdate -> {
             return new Store(storeApiUpdate);
@@ -222,19 +234,23 @@ public class BatchConfiguration {
     }
 
 
-    private ItemWriter<Store> jpaPageJob1_step2_dbItemWriter() {
+        private ItemWriter<Store> jpaPageJob1_step2_dbItemWriter() {
         log.info("********** This is jpaPageJob1_step2_dbItemWriter");
         return list -> {
             for(Store store: list){
+                log.info("{} {}",store.getId(), store.getName());
                 System.out.println(store.getId());
-            }
 
+            }
+            JpaItemWriter<Store> jpaItemWriter = new JpaItemWriter<>();
+            jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
         };
 
 //            JpaItemWriter<Store> jpaItemWriter = new JpaItemWriter<>();
 //            jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
 //            return jpaItemWriter;
     }
+ */
 
 
 
@@ -289,6 +305,7 @@ public class BatchConfiguration {
 //    }
 
 
+    /*
     @Bean
     public Step JpaPageJob1_step4() throws JsonProcessingException {
         return stepBuilderFactory.get("JpaPageJob1_step4")
@@ -354,6 +371,8 @@ public class BatchConfiguration {
 
     }
 
+     */
+
 
 
 
@@ -366,89 +385,6 @@ public class BatchConfiguration {
     private String publicV2Key2;
 
 
-    /**
-     * @return 헤더 세팅 - V2에서는 공통으로 XML 사용
-     */
-    private HttpHeaders setHttpHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML);
-        headers.setAccept(List.of(MediaType.APPLICATION_XML));
-        return headers;
-    }
-
-    /**
-     * @param sisulNum 시설 고유 번호
-     * @return API 결과로 나온 문자열을 리스트로 분리
-     */
-    public List<String> tagStrToList(String sisulNum) {
-        HttpHeaders headers = setHttpHeaders();
-        String publicV2CategoryUri = "http://apis.data.go.kr/B554287/DisabledPersonConvenientFacility/getFacInfoOpenApiJpEvalInfoList";
-        URI uri = UriComponentsBuilder
-                .fromUriString(publicV2CategoryUri)
-                .queryParam("serviceKey", publicV2Key2)
-                .queryParam("wfcltId", sisulNum)
-                .build()
-                .encode()
-                .toUri();
-
-        RestTemplate restTemplate = new RestTemplate();
-        log.warn(uri.toString());
-        ResponseEntity<PublicApiCategoryForm> resultRe = restTemplate.exchange(
-                uri, HttpMethod.GET, new HttpEntity<>(headers), PublicApiCategoryForm.class
-        );
-        PublicApiCategoryForm result = resultRe.getBody();
-        return mapTags(result);
-    }
-
-    /**
-     * @param result API 결과로 나온 리스트
-     * @return DB에 맞게 리스트를 변환
-     */
-    private List<String> mapTags(PublicApiCategoryForm result) {
-        List<String> barrierTagResult = new ArrayList<>(); // 태그 결과들을 담을 리스트
-        if (result == null || result.getServList() == null) {
-            return barrierTagResult;
-        } else {
-            PublicApiCategoryForm.ServList first = result.getServList().stream().findFirst().orElse(null);
-            // Input 한 개당 하나의 배리어 프리 정보가 생성되므로 하나만 찾는다
-            List<String> splitInput = getStrings(first);
-            if (splitInput != null) return splitInput;
-        }
-        return barrierTagResult;
-    }
-
-    /**
-     * @param serv API 결과
-     * @return Enum을 통해 String 가공해서 변환
-     */
-    private List<String> getStrings(PublicApiCategoryForm.ServList serv) {
-        if (serv != null && serv.validation()) { // 결과가 존재할 떄
-            String[] splitInput = serv.getEvalInfo().split(",");
-            return Arrays.stream(splitInput)
-                    .map(BarrierCode::getColumnFromDesc)
-                    .filter(code -> code != null && !code.equals(""))
-                    .collect(Collectors.toList());
-        }
-        return null;
-    }
-
-
-
-//    public void start() throws IOException, InterruptedException {
-//        List<String[]> list = new ArrayList<>();
-//        BufferedReader br = null;
-//        File file = ResourceUtils.getFile("classpath:static/sigungu.csv");
-//        br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-//        String line = null;
-//        while ((line = br.readLine()) != null) {
-//            String[] lineContents = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-//            list.add(lineContents);
-//        }
-//        for (String[] strings : list) {
-//            System.out.println("String 프린트중 : " + Arrays.toString(strings));
-//            processApi(strings[0], strings[1], 1);
-//        }
-//    }
 
     /** CSV 파일 읽기 */
     private List<List<String>> readCSVFile(String filePath){
@@ -485,67 +421,6 @@ public class BatchConfiguration {
 
 
 
-
-    /**
-     * @param jsonDTO API 호출 결과
-     */
-    private void setInfos(JsonDTO jsonDTO) {
-        jsonDTO.getTouristFoodInfo().getRow().forEach(row -> {
-                    try {
-                        if (!setRowLngLat(row)) return; // 주소를 가지고 위/경도를 찾는다
-                    } catch (JsonProcessingException e) {
-                        throw new CustomException(ErrorCode.API_LOAD_FAILURE);
-                    }
-                    try {
-                        setRowCategoryAndId(row); // 위/경도/매장명을 가지고 키워드 설정
-                    } catch (JsonProcessingException e) {
-                        throw new CustomException(ErrorCode.API_LOAD_FAILURE);
-                    }
-                }
-        );
-    }
-
-
-    /**
-     * @param row 공공 API 결과에서의 각각의 행
-     * @return 위도, 경도 매핑 성공/실패 여부
-     * @throws JsonProcessingException JSON 파싱, 매핑 오류시 발생하는 Exception
-     */
-    private boolean setRowLngLat(StoreDTO row) throws JsonProcessingException {
-        LocationPartDto.LatLong latLong = locationServiceRT.convertAddressToGeo(row.getADDR());
-        if (latLong == null || !latLong.validate()) return false;
-        row.setLatitude(Decimal.valueOf(latLong.getLatitude()));
-        row.setLongitude(Decimal.valueOf(latLong.getLongitude()));
-        return true;
-    }
-
-
-    /**
-     * @param row 행 하나하나
-     * @throws JsonProcessingException JSON 파싱, 매핑 오류시 발생하는 Exception
-     */
-    private void setRowCategoryAndId(StoreDTO row) throws JsonProcessingException {
-        LocationInfoDto.LocationResponse locationResponse = locationServiceRT
-                .convertGeoAndStoreNameToKeyword(String.valueOf(row.getLatitude()), String.valueOf(row.getLongitude()), row.getSISULNAME());
-        if (locationResponse == null)
-            return; // 결과가 비어있으면 진행하지 않는다
-        row.setStoreId(locationResponse.getStoreId());
-        row.setSISULNAME(locationResponse.getStoreName());
-        row.setCategory(locationResponse.getCategory());
-    }
-
-
-    /**
-     * @param rows 검증할 행
-     */
-    @Transactional
-    public List<StoreApiUpdate> saveValidStores(List<StoreDTO> rows) {
-        List<StoreApiUpdate> storeList = rows.stream().filter(StoreDTO::validation)
-                .map(StoreApiUpdate::new).collect(Collectors.toList());
-
-
-        return storeList;
-    }
 
 
 

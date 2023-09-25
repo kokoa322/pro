@@ -59,7 +59,7 @@ public class ApiUpdateThread extends Thread {
 
     public void sleeper() {
         try{
-            Thread.sleep(2000);
+            Thread.sleep(5000);
         } catch (Exception e) {
             e.printStackTrace();
         }
