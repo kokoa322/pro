@@ -79,9 +79,9 @@ public class BatchConfiguration {
     public Job JpaPageJob1_storeApiUpdate() throws JsonProcessingException{
             return jobBuilderFactory.get("JpaPageJob1_storeApiUpdate")
                     .start(JpaPageJob1_step1()) // store_api_update API 응답데이터 받기
-                    //.next(jpaPageJob1_step2())  // 추가된 업장이 있으면 store 테이블에 INSERT
+                    .next(jpaPageJob1_step2())  // 추가된 업장이 있으면 store 테이블에 INSERT
                     //.start(JpaPageJob4_step1())  // 사라진 업장이 있으면 store 테이블에 DELETE
-                    //.next(JpaPageJob1_step4()) // 수정된 업장이 있다면 store 테이블에 UPDATE
+                    .next(JpaPageJob1_step4()) // 수정된 업장이 있다면 store 테이블에 UPDATE
                     .build();
     }
 
@@ -190,16 +190,17 @@ public class BatchConfiguration {
             return list -> {
                 for(StoreApiUpdate storeApiUpdate: list){
                     System.out.println(storeApiUpdate.getId());
-                   // if(!storeApiUpdateRepository.existsById(storeApiUpdate.getId())){
-                     //   storeImageService.saveImage(storeApiUpdate.getId());
-                       // storeApiUpdateRepository.save(storeApiUpdate);
-                   // }
+                    log.info("{} {}",storeApiUpdate.getId(), storeApiUpdate.getName());
+                    if(!storeApiUpdateRepository.existsById(storeApiUpdate.getId())){
+                        storeImageService.saveImage(storeApiUpdate.getId());
+                        storeApiUpdateRepository.save(storeApiUpdate);
+                    }
                 }
              //storeApiUpdateRepository.saveAll(list);
             };
         }
 
-/*
+
     @Bean
     public Step jpaPageJob1_step2() throws JsonProcessingException {
         return stepBuilderFactory.get("jpaPageJob1_step2")
@@ -250,62 +251,60 @@ public class BatchConfiguration {
 //            jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
 //            return jpaItemWriter;
     }
- */
+
+
+/*
+    @Bean
+    public Step JpaPageJob4_step1() throws JsonProcessingException {
+        return stepBuilderFactory.get("JpaPageJob4_step2")
+                //청크사이즈 설정
+                .<Store, Store>chunk(CHUNKSIZE)
+                .reader(jpaPageJob4_ItemReader())
+                .processor(jpaPageJob4_Processor())
+                .writer(jpaPageJob4_dbItemWriter())
+                .build();
+
+    }
+
+    @Bean
+    public JpaPagingItemReader<Store> jpaPageJob4_ItemReader() throws JsonProcessingException {
+
+
+        System.out.println("test ㅅㅅㄷㄴㅅ");
+        log.info("********** This is unPaidStoreReader");
+        return new JpaPagingItemReaderBuilder<Store>()
+                .name("jpaPageJob3_dbItemReader")
+                .entityManagerFactory(entityManagerFactory)
+                .pageSize(CHUNKSIZE)
+                .queryString("select a from Store_api_update a left join Store b on a.id = b.id where b.id is null order by a.id asc")
+                .build();
+    }
 
 
 
-//    @Bean
-//    public Step JpaPageJob4_step1() throws JsonProcessingException {
-//        return stepBuilderFactory.get("JpaPageJob4_step2")
-//                //청크사이즈 설정
-//                .<Store, Store>chunk(CHUNKSIZE)
-//                .reader(jpaPageJob4_ItemReader())
-//                .processor(jpaPageJob4_Processor())
-//                .writer(jpaPageJob4_dbItemWriter())
-//                .build();
-//
-//    }
-//
-//    @Bean
-//    public JpaPagingItemReader<Store> jpaPageJob4_ItemReader() throws JsonProcessingException {
-//
-//
-//        System.out.println("test ㅅㅅㄷㄴㅅ");
-//        log.info("********** This is unPaidStoreReader");
-//        return new JpaPagingItemReaderBuilder<Store>()
-//                .name("jpaPageJob3_dbItemReader")
-//                .entityManagerFactory(entityManagerFactory)
-//                .pageSize(CHUNKSIZE)
-//                .queryString("select a from Store_api_update a left join Store b on a.id = b.id where b.id is null order by a.id asc")
-//                .build();
-//    }
-//
-//
-//
-//
-//    private ItemProcessor<Store, Store> jpaPageJob4_Processor() {
-//        log.info("********** This is unPaidStoreProcessor");
-//        return new ItemProcessor<Store, Store>() {  //
-//
-//            @Override
-//            public Store process(Store store) throws Exception {
-//                log.info("********** This is unPaidMemberProcessor");
-//                return store;  // 2
-//
-//            }
-//        };
-//
-//    }
-//
-//
-//    private ItemWriter<Store> jpaPageJob4_dbItemWriter() {
-//        log.info("********** This is jpaPageJob3_dbItemWriter");
-//
-//        return ((List<? extends Store> storeList) -> storeRepository.deleteAll(storeList));
-//    }
+
+    private ItemProcessor<Store, Store> jpaPageJob4_Processor() {
+        log.info("********** This is unPaidStoreProcessor");
+        return new ItemProcessor<Store, Store>() {  //
+
+            @Override
+            public Store process(Store store) throws Exception {
+                log.info("********** This is unPaidMemberProcessor");
+                return store;  // 2
+
+            }
+        };
+
+    }
 
 
-    /*
+    private ItemWriter<Store> jpaPageJob4_dbItemWriter() {
+        log.info("********** This is jpaPageJob3_dbItemWriter");
+
+        return ((List<? extends Store> storeList) -> storeRepository.deleteAll(storeList));
+    }
+*/
+
     @Bean
     public Step JpaPageJob1_step4() throws JsonProcessingException {
         return stepBuilderFactory.get("JpaPageJob1_step4")
@@ -317,61 +316,58 @@ public class BatchConfiguration {
                 .build();
     }
 
+        @Bean
+        public JpaPagingItemReader<StoreApiUpdate> JpaPageJob1_step4_ItemReader() throws JsonProcessingException {
+
+            log.info("********** This is JpaPageJob1_step4_ItemReader");
+            return new JpaPagingItemReaderBuilder<StoreApiUpdate>()
+                    .name("jpaPageJob5_dbItemReader")
+                    .entityManagerFactory(entityManagerFactory)
+                    .pageSize(CHUNKSIZE)
+                    .queryString("select a from Store_api_update a join Store b on a.id = b.id where a.id = b.id \n" +
+                            "and a.approach != b.approach \n" +
+                            "or a.address != b.address \n" +
+                            "or a.elevator != b.elevator  \n" +
+                            "or a.latitude != b.latitude \n" +
+                            "or a.longitude != b.longitude \n" +
+                            "or a.name != b.name \n" +
+                            "or a.parking != b.parking \n" +
+                            "or a.phoneNumber != b.phoneNumber\n" +
+                            "or a.heightDifferent != b.heightDifferent \n" +
+                            "or a.toilet != b.toilet order by a.id asc")
+                    .build();
+        }
 
 
-    @Bean
-    public JpaPagingItemReader<StoreApiUpdate> JpaPageJob1_step4_ItemReader() throws JsonProcessingException {
+        private ItemProcessor<StoreApiUpdate, Store> JpaPageJob1_step4_Processor() {
+            log.info("********** This is JpaPageJob1_step4_Processor");
+            return storeApiUpdate -> {
 
-        log.info("********** This is JpaPageJob1_step4_ItemReader");
-        return new JpaPagingItemReaderBuilder<StoreApiUpdate>()
-                .name("jpaPageJob5_dbItemReader")
-                .entityManagerFactory(entityManagerFactory)
-                .pageSize(CHUNKSIZE)
-                .queryString("select a from Store_api_update a join Store b on a.id = b.id where a.id = b.id \n" +
-                        "and a.approach != b.approach \n" +
-                        "or a.address != b.address \n" +
-                        "or a.elevator != b.elevator  \n" +
-                        "or a.latitude != b.latitude \n" +
-                        "or a.longitude != b.longitude \n" +
-                        "or a.name != b.name \n" +
-                        "or a.parking != b.parking \n" +
-                        "or a.phoneNumber != b.phoneNumber\n" +
-                        "or a.heightDifferent != b.heightDifferent \n" +
-                        "or a.toilet != b.toilet order by a.id asc")
-                .build();
-    }
+                Optional<Store> store = storeRepository.findById(storeApiUpdate.getId());
+                store.get().apiUpdate(storeApiUpdate);
+
+                return store.get();
+            };
+        }
 
 
-    private ItemProcessor<StoreApiUpdate, Store> JpaPageJob1_step4_Processor() {
-        log.info("********** This is JpaPageJob1_step4_Processor");
-        return storeApiUpdate -> {
+        private ItemWriter<Store> JpaPageJob1_step4_dbItemWriter() {
+            log.info("********** This is JpaPageJob1_step4_dbItemWriter"+ "  STORE_SIZE -->"+ STORE_SIZE);
 
-            Optional<Store> store = storeRepository.findById(storeApiUpdate.getId());
-            store.get().apiUpdate(storeApiUpdate);
+            return list -> {
+                for(Store store: list){
+                    System.out.println(store.getId());
+                }
 
-            return store.get();
-        };
-    }
+            };
 
+            //        return ((List<? extends Store> storeList) -> storeRepository.saveAll(storeList));
+    //            JpaItemWriter<Store> jpaItemWriter = new JpaItemWriter<>();
+    //            jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
+    //            return jpaItemWriter;
 
-    private ItemWriter<Store> JpaPageJob1_step4_dbItemWriter() {
-        log.info("********** This is JpaPageJob1_step4_dbItemWriter"+ "  STORE_SIZE -->"+ STORE_SIZE);
+        }
 
-        return list -> {
-            for(Store store: list){
-                System.out.println(store.getId());
-            }
-
-        };
-
-        //        return ((List<? extends Store> storeList) -> storeRepository.saveAll(storeList));
-//            JpaItemWriter<Store> jpaItemWriter = new JpaItemWriter<>();
-//            jpaItemWriter.setEntityManagerFactory(entityManagerFactory);
-//            return jpaItemWriter;
-
-    }
-
-     */
 
 
 

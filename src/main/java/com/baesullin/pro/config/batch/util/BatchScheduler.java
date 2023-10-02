@@ -35,7 +35,7 @@ public class BatchScheduler {
     @SchedulerLock(name = "updateScheduler", lockAtLeastFor = "PT58M", lockAtMostFor = "PT59M")
     public void storeApiUpdateJob() {
         // 처음 실행될 때만 실행하고 초기화 플래그를 설정
-        if (scheduledEnable) {
+//        if (scheduledEnable) {
             LocalDateTime now = LocalDateTime.now();
             System.out.println(now.getHour() + ":" + now.getMinute() + ":" + now.getSecond());
 
@@ -58,11 +58,11 @@ public class BatchScheduler {
                 throw new RuntimeException(e);
             }
 
-        } else if (!scheduledEnable){
-            System.out.println("storeApiUpdateJob");
-            scheduledEnable = true;
-            return;
-        }
+//        } else if (!scheduledEnable){
+//            System.out.println("storeApiUpdateJob");
+//            scheduledEnable = true;
+//            return;
+//        }
     }
 }
 
